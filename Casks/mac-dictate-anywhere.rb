@@ -1,8 +1,8 @@
 cask "mac-dictate-anywhere" do
-  version "2.8.3"
+  version "2.8.3,38"
   sha256 "c37d3af83c7c899670e5cba2b28c344b53104bf899555eef9775e87cb91f835a"
 
-  url "https://github.com/hoomanaskari/mac-dictate-anywhere/releases/download/v#{version}/DictateAnywhere-#{version}.zip"
+  url "https://github.com/hoomanaskari/mac-dictate-anywhere/releases/download/v#{version.csv.first}/DictateAnywhere-#{version.csv.first}.zip"
   name "Dictate Anywhere"
   desc "On-device voice dictation for any app"
   homepage "https://github.com/hoomanaskari/mac-dictate-anywhere"
