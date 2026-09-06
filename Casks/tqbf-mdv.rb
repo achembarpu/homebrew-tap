@@ -20,11 +20,10 @@ cask "tqbf-mdv" do
   # The release zip ships AppleDouble (._) junk files inside the bundle, which
   # break the developer signature's seal: Gatekeeper treats the app as damaged
   # and blocks first launch. Clear quarantine and re-sign locally.
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args: ["-cr", "#{appdir}/mdv.app"]
-    system_command "/usr/bin/codesign",
-                   args: ["--force", "--deep", "--sign", "-", "#{appdir}/mdv.app"]
+  postflight_steps do
+    run "/usr/bin/xattr", args: ["-cr", "{{appdir}}/mdv.app"]
+    run "/usr/bin/codesign",
+        args: ["--force", "--deep", "--sign", "-", "{{appdir}}/mdv.app"]
   end
 
   zap trash: [

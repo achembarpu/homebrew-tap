@@ -22,11 +22,10 @@ cask "localvoxtral" do
   # replicate that here so first launch works on macOS 15 and macOS 26 alike
   # (macOS 26 can hang on a foreign ad-hoc signature during Gatekeeper's
   # first-exec scan unless the bundle is re-signed locally).
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args: ["-cr", "#{appdir}/localvoxtral.app"]
-    system_command "/usr/bin/codesign",
-                   args: ["--force", "--deep", "--sign", "-", "#{appdir}/localvoxtral.app"]
+  postflight_steps do
+    run "/usr/bin/xattr", args: ["-cr", "{{appdir}}/localvoxtral.app"]
+    run "/usr/bin/codesign",
+        args: ["--force", "--deep", "--sign", "-", "{{appdir}}/localvoxtral.app"]
   end
 
   zap trash: [

@@ -14,21 +14,18 @@ cask "optcgsim" do
 
   # The sim is ad-hoc signed, not notarized. The site's own fix (the bundled
   # applescript) clears quarantine and restores execute bits on the MacOS
-  # binaries; postflight does both of those plus an ad-hoc re-sign to keep
+  # binaries; postflight steps do both of those plus an ad-hoc re-sign to keep
   # Gatekeeper's first-exec scan happy, matching scripts/add-cask.sh --re-sign.
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args: ["-cr", "#{appdir}/OPTCGSim.app"]
+  postflight_steps do
+    run "/usr/bin/xattr", args: ["-cr", "{{appdir}}/OPTCGSim.app"]
     # The Windows-built zip stores no exec bits, so restore them on the
-    # binaries the bundled applescript chmods (system_command does not
-    # shell-expand globs, so expand them in Ruby).
-    app_root = "#{appdir}/OPTCGSim.app"
-    macos_dir = "#{app_root}/Contents/MacOS"
-    bounty_macos_dir = "#{app_root}/Contents/Resources/Data/StreamingAssets/OPBounty/mac/OPBounty.app/Contents/MacOS"
-    system_command "/bin/chmod",
-                   args: ["+x"] + Dir.glob("#{macos_dir}/*") + Dir.glob("#{bounty_macos_dir}/*")
-    system_command "/usr/bin/codesign",
-                   args: ["--force", "--deep", "--sign", "-", "#{appdir}/OPTCGSim.app"]
+    # binaries the bundled applescript chmods.
+    set_permissions [
+      "{{appdir}}/OPTCGSim.app/Contents/MacOS/*",
+      "{{appdir}}/OPTCGSim.app/Contents/Resources/Data/StreamingAssets/OPBounty/mac/OPBounty.app/Contents/MacOS/*",
+    ], "+x", recursive: false
+    run "/usr/bin/codesign",
+        args: ["--force", "--deep", "--sign", "-", "{{appdir}}/OPTCGSim.app"]
   end
 
   zap trash: [
