@@ -54,7 +54,7 @@ casks. Run `./scripts/add-cask.sh --help` for its options.
 
 - `autobump` — `brew bump --no-fork --open-pr` for every `livecheck`-enabled
   cask/formula (`clearly`, `junie`, `localvoxtral`, `mac-dictate-anywhere`,
-  `mowglii-mdv`, `nativ`, `prime-agent`, `tqbf-mdv`). `qwen-code` and `maki`
+  `mowglii-mdv`, `prime-agent`, `tqbf-mdv`). `qwen-code` and `maki`
   are excluded because Homebrew's generic bump parser cannot rewrite their
   architecture-specific URL stanzas; `bump-arch-formulae` uses the dedicated
   updater instead. Do not use `no_autobump!` in this personal tap because
