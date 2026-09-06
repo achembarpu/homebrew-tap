@@ -7,10 +7,12 @@ binaries.
 
 ## Hard rules
 
-- Every cask and formula MUST pin `version` + `sha256` and MUST point `url` at a real
-  release asset. Never add `:no_check` or a `live`/rolling URL. If the
-  release has no `.sha256` asset, download the artifact and compute the hash
-  with `shasum -a 256`.
+- Every cask and formula MUST pin an exact upstream version + `sha256` and MUST
+  point `url` at a real release asset. A formula may rely on the version
+  unambiguously encoded in its immutable release URL; adding a duplicate
+  explicit `version` stanza makes Homebrew audit fail. Never add `:no_check` or
+  a `live`/rolling URL. If the release has no `.sha256` asset, download the
+  artifact and compute the hash with `shasum -a 256`.
 - Never vendor or embed an app's binaries here. Each cask and formula is a thin wrapper.
 - Ad-hoc-signed / un-notarized releases are common and fine, but they MUST
   ship a `postflight` that clears quarantine and re-signs locally (`xattr -cr`
@@ -53,9 +55,11 @@ casks. Run `./scripts/add-cask.sh --help` for its options.
 - `autobump` — `brew bump --no-fork --open-pr` for every `livecheck`-enabled
   cask/formula (`clearly`, `junie`, `localvoxtral`, `mac-dictate-anywhere`,
   `mowglii-mdv`, `nativ`, `prime-agent`, `tqbf-mdv`). `qwen-code` and `maki`
-  use `no_autobump!` because Homebrew's generic bump parser cannot rewrite
-  architecture-specific URL stanzas. One PR per outdated package, de-duplicated against
-  open PRs.
+  are excluded because Homebrew's generic bump parser cannot rewrite their
+  architecture-specific URL stanzas; `bump-arch-formulae` uses the dedicated
+  updater instead. Do not use `no_autobump!` in this personal tap because
+  Homebrew rejects that DSL outside official taps. One PR per outdated package,
+  de-duplicated against open PRs.
 - `bump-optcgsim` — runs `scripts/update-optcgsim.sh` for the Dropbox-hosted
   cask that has no `livecheck`.
 - `bump-junie-local` — runs `scripts/update-junie-local.sh` for the
@@ -70,9 +74,10 @@ committing.
 
 ## Conventions
 
-- `brew style --fix` is the arbiter of stanza order (`version, sha256, url,
-  name, desc, homepage, livecheck, depends_on, app, postflight, zap,
-  caveats`) — run it, don't fight it.
+- `brew style --fix` is the arbiter of stanza order — run it, don't fight it.
+  Casks generally use `version, sha256, url`; formulas generally use
+  `url, sha256, license`, with an explicit `version` only when Homebrew cannot
+  infer it from the pinned URL.
 - `desc` must start with a capital letter (a style cop).
 - Default `depends_on macos: :sequoia` and `depends_on arch: :arm64` only when
   the app actually requires them; don't guess.
@@ -83,5 +88,5 @@ committing.
 ## Scope
 
 - Casks wrap GUI apps from GitHub releases with `.zip` (preferred) or `.dmg` assets that contain a `.app` bundle. The documented non-GitHub exception is `mowglii-mdv`, which uses Mowglii's pinned S3 DMG and Sparkle appcast.
-- Formulas wrap CLI tools and scripts that do not contain a `.app` bundle. Each formula pins an upstream artifact with `version` + `sha256`, no live fetches, no vendored binaries unless the build is from source. Use a GitHub release asset where available; the documented exceptions are `junie-local` (a pinned raw upstream script), `optcgsim` (a site-hosted app archive), and `prime-agent` (an npm tarball whose declared dependencies are resolved during the build). See `junie-local` for a script wrapper and `prime-agent` for an npm tarball pattern.
+- Formulas wrap CLI tools and scripts that do not contain a `.app` bundle. Each formula pins an upstream artifact with an exact version and `sha256` (explicitly or through an immutable versioned release URL), no live fetches, no vendored binaries unless the build is from source. Use a GitHub release asset where available; the documented exceptions are `junie-local` (a pinned raw upstream script), `optcgsim` (a site-hosted app archive), and `prime-agent` (an npm tarball whose declared dependencies are resolved during the build). See `junie-local` for a script wrapper and `prime-agent` for an npm tarball pattern.
 - Uninstall runs `brew uninstall --cask --zap <name>` for casks (data paths come from the cask's `zap`) and `brew uninstall <name>` for formulae.

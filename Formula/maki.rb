@@ -3,11 +3,9 @@ class Maki < Formula
   homepage "https://maki.sh"
   if Hardware::CPU.arm?
     url "https://github.com/tontinton/maki/releases/download/v0.5.1/maki-v0.5.1-aarch64-apple-darwin.tar.gz"
-    version "0.5.1"
     sha256 "6011d7f7045110192aa94f4f493fe02471b3f11d5dff3c3173c6dcc2a661e113"
   else
     url "https://github.com/tontinton/maki/releases/download/v0.5.1/maki-v0.5.1-x86_64-apple-darwin.tar.gz"
-    version "0.5.1"
     sha256 "e8b429b1b2fbdf6bc33101f93659ae1721ab4e1477ec63de2c2134b51068dc6f"
   end
   license "MIT"
@@ -17,7 +15,6 @@ class Maki < Formula
     strategy :github_latest
   end
 
-  no_autobump! because: :requires_manual_review
   depends_on :macos
 
   def install

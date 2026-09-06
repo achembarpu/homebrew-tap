@@ -81,8 +81,10 @@ artifacts require the manual workflow described by the skill.
 ```
 
 This rewrites `version`, `sha256`, and `url` in place for casks, keeping your `desc`,
-`zap`, and `caveats`. For formulae, bump `version`, `sha256`, and `url` by hand.
-Then `brew style`, `brew audit`, commit, push — clients run `brew update && brew upgrade`.
+`zap`, and `caveats`. For formulae, use the dedicated architecture updater
+for `qwen-code` and `maki`; ordinary versioned release formulas can use
+`brew bump`. Then run `brew style`, `brew audit`, commit, and push — clients
+run `brew update && brew upgrade`.
 
 ### Updating `optcgsim`
 
@@ -111,11 +113,9 @@ repository-scoped GitHub token because Homebrew's PR helper cannot use the
 default Actions `GITHUB_TOKEN`.
 
 - `autobump` — runs `brew bump --no-fork --open-pr <package>` for each
-  livecheck-enabled cask and formula except `prime-agent`. The `prime-agent`
-  path downloads the release, recomputes `sha256`, rewrites its explicit
-  `url`/`version`/`sha256` stanzas, and opens its PR directly. Each automated
-  package gets its own PR. The job de-duplicates against open PRs and runs
-  `brew audit` and `brew style` inline.
+  livecheck-enabled cask and formula handled by the generic path, including
+  `prime-agent`. Each automated package gets its own PR. The job de-duplicates
+  against open PRs and runs `brew audit` and `brew style` inline.
 
 - `bump-optcgsim` — runs `scripts/update-optcgsim.sh` (see above) and opens a
   PR with `peter-evans/create-pull-request` when the RSS version differs.

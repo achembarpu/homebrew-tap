@@ -60,11 +60,11 @@ read -r TARGET_VERSION ARM_URL INTEL_URL <<< "$RELEASE_META"
 CURRENT_VERSION="$(python3 - "$FORMULA_FILE" <<'PY'
 import re, sys
 text = open(sys.argv[1]).read()
-m = re.search(r'^    version "([^"]+)"$', text, re.MULTILINE)
+m = re.search(r'/releases/download/v([^/"?]+)/', text)
 print(m.group(1) if m else "")
 PY
 )"
-[[ -n "$CURRENT_VERSION" ]] || { printf 'Error: could not read current version\n' >&2; exit 1; }
+[[ -n "$CURRENT_VERSION" ]] || { printf 'Error: could not read current version from release URL\n' >&2; exit 1; }
 if [[ "$TARGET_VERSION" == "$CURRENT_VERSION" ]]; then
   printf '%s already up to date: %s\n' "$FORMULA" "$CURRENT_VERSION"
   exit 0
@@ -91,7 +91,6 @@ for i, line in enumerate(lines):
     if line.strip() == "license \"Apache-2.0\"" or line.strip() == "license \"MIT\"": break
     if line.strip() == "else": branch = "intel"
     if re.match(r'\s+url "', line): lines[i] = re.sub(r'url "[^"]+"', f'url "{arm_url if branch == "arm" else intel_url}"', line)
-    elif re.match(r'\s+version "', line): lines[i] = re.sub(r'version "[^"]+"', f'version "{new}"', line)
     elif re.match(r'\s+sha256 "', line): lines[i] = re.sub(r'sha256 "[^"]+"', f'sha256 "{arm_sha if branch == "arm" else intel_sha}"', line)
 path.write_text(''.join(lines))
 PY

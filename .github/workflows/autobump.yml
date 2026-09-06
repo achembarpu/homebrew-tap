@@ -47,21 +47,18 @@ jobs:
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git -C "$tap_root" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
 
-      # brew bump checks each livecheck-enabled package except prime-agent
-      # (clearly, junie, localvoxtral, mac-dictate-anywhere, mowglii-mdv,
-      # nativ, tqbf-mdv). The prime-agent release is updated inline because
-      # its explicit version stanza requires a manual URL/version/sha256 bump. The generic path
-      # downloads the new artifact, recomputes sha256,
-      # rewrites version/sha256/url in place, runs `brew audit`/`brew style`,
-      # de-duplicates against open PRs, and opens one PR per outdated
-      # package with --no-fork (branch pushed directly to this repo).
+      # brew bump checks each livecheck-enabled package in this list. The
+      # generic path downloads a new artifact, recomputes sha256, rewrites the
+      # versioned URL and checksum, runs `brew audit`/`brew style`,
+      # de-duplicates against open PRs, and opens one PR per outdated package
+      # with --no-fork (branch pushed directly to this repo).
       # HOMEBREW_GITHUB_API_TOKEN must be a repository-scoped PAT. The default
       # Actions GITHUB_TOKEN has no API token scopes for Homebrew's PR helper.
       #
       # Excluded automatically (handled by dedicated jobs):
       #   - junie-local: livecheck skip (vendored commit-pin, see bump-junie-local)
       #   - optcgsim:    no livecheck (Dropbox-hosted, see bump-optcgsim)
-      #   - qwen-code/maki: no_autobump! (architecture-specific URLs)
+      #   - qwen-code/maki: architecture-specific URLs (see bump-arch-formulae)
       - name: Bump outdated packages
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
@@ -71,44 +68,7 @@ jobs:
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
           for package in clearly junie localvoxtral mac-dictate-anywhere mowglii-mdv nativ tqbf-mdv prime-agent; do
-            if [ "$package" = "prime-agent" ]; then
-              latest="$(brew livecheck --json "$TAP_NAME/$package" | ruby -rjson -e 'puts JSON.parse(STDIN.read).first.fetch("version").fetch("latest")')"
-              tap_root="$(brew --repository "$TAP_NAME")"
-              formula_file="$tap_root/Formula/prime-agent.rb"
-              current="$(sed -n 's/^  version "\([^"]*\)"$/\1/p' "$formula_file")"
-              url="$(sed -n 's/^  url "\([^"]*\)"$/\1/p' "$formula_file")"
-              new_url="${url//$current/$latest}"
-              archive="$(mktemp)"
-              trap 'rm -f "$archive"' EXIT
-              curl -fsSL --retry 3 "$new_url" -o "$archive"
-              sha256="$(shasum -a 256 "$archive" | awk '{print $1}')"
-              URL="$new_url" LATEST="$latest" SHA256="$sha256" python3 - "$formula_file" <<'PY'
-          import os
-          import pathlib
-          import re
-          import sys
-
-          path = pathlib.Path(sys.argv[1])
-          text = path.read_text()
-          text = re.sub(r'(?m)^  url "[^"]*"$', f'  url "{os.environ["URL"]}"', text)
-          text = re.sub(r'(?m)^  version "[^"]*"$', f'  version "{os.environ["LATEST"]}"', text)
-          text = re.sub(r'(?m)^  sha256 "[^"]*"$', f'  sha256 "{os.environ["SHA256"]}"', text)
-          path.write_text(text)
-          PY
-              brew style "$formula_file"
-              branch="bump-prime-agent-$latest"
-              if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
-                echo "Branch $branch already exists on remote, skipping"
-                continue
-              fi
-              git -C "$tap_root" checkout -b "$branch"
-              git -C "$tap_root" add Formula/prime-agent.rb
-              git -C "$tap_root" commit -m "prime-agent $latest"
-              git -C "$tap_root" push origin "$branch"
-              gh pr create --repo "$GITHUB_REPOSITORY" --title "prime-agent $latest" --body "Automated bump of prime-agent to $latest."
-            else
-              brew bump --no-fork --open-pr "$TAP_NAME/$package"
-            fi
+            brew bump --no-fork --open-pr "$TAP_NAME/$package"
           done
 
   bump-optcgsim:
@@ -264,7 +224,7 @@ jobs:
           ./scripts/update-arch-formula.sh "${{ matrix.formula }}"
           brew style "Formula/${{ matrix.formula }}.rb"
           ruby -c "Formula/${{ matrix.formula }}.rb"
-          version="$(sed -n 's/^    version "\([^"]*\)"$/\1/p' "Formula/${{ matrix.formula }}.rb" | head -1)"
+          version="$(sed -n 's|.*releases/download/v\([^/"]*\)/.*|\1|p' "Formula/${{ matrix.formula }}.rb" | head -1)"
           echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Set up git
         if: steps.check.outputs.needed == 'true'
