@@ -1,6 +1,6 @@
 cask "optcgsim" do
-  version "1.42c"
-  sha256 "acae86f45c3930076aadf4ad4b00f33bdc1bcfa9f00378ee47fa34e54e458841"
+  version "1.43a"
+  sha256 "058855b137b5a214df20b2b2a7d610bc672f9993ea7d861dfe008a2c68a186a4"
 
   url "https://www.dropbox.com/scl/fi/te0z476tf5wamm827fnm8/1_#{version.tr(".", "_")}_Mac.zip?rlkey=laxvcq3xzof78lzijeprxh12y&st=95sfxiex&dl=1",
       only_path: "#{version}_Mac"
