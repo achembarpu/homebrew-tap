@@ -12,6 +12,7 @@ cask "tuicommander" do
     strategy :github_latest
   end
 
+  auto_updates true
   depends_on macos: :high_sierra
   depends_on arch: :arm64
 

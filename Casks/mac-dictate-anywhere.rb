@@ -8,10 +8,11 @@ cask "mac-dictate-anywhere" do
   homepage "https://github.com/hoomanaskari/mac-dictate-anywhere"
 
   livecheck do
-    url "https://github.com/hoomanaskari/mac-dictate-anywhere/releases/latest"
-    strategy :github_latest
+    url "https://raw.githubusercontent.com/hoomanaskari/mac-dictate-anywhere/main/appcast.xml"
+    strategy :sparkle
   end
 
+  auto_updates true
   depends_on macos: :sonoma
 
   app "Dictate Anywhere.app"

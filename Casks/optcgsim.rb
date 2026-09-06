@@ -42,8 +42,8 @@ cask "optcgsim" do
   caveats <<~EOS
     The cask pins the site's current Mac build (1.42c), served from the site's
     Dropbox link, which is still named 1_30d_Mac.zip. Since v1.40a the app
-    self-updates in-app via its auto-patcher, so newer versions may arrive
-    without a cask update.
+    self-patches offline minor versions in-app, but online-launchable versions
+    require a cask update and cannot be upgraded by the auto-patcher.
 
     The bundled applescript clears quarantine and restores execute bits on the
     app's MacOS binaries; postflight does both of those plus an ad-hoc
