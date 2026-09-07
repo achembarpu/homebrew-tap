@@ -67,7 +67,7 @@ jobs:
           HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git_setup.outputs.email }}
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
-          for package in clearly junie localvoxtral mac-dictate-anywhere mowglii-mdv nativ tqbf-mdv prime-agent; do
+          for package in clearly junie kero localvoxtral mac-dictate-anywhere mowglii-mdv nativ tqbf-mdv prime-agent waku; do
             brew bump --no-fork --open-pr "$TAP_NAME/$package"
           done
 
