@@ -37,6 +37,7 @@ user data manually using the command in the formula's caveats.
 
 | Cask | What | Notes |
 | --- | --- | --- |
+| `agent-orchestrator` | Desktop workspace for orchestrating coding agents (Apple Silicon & Intel, macOS 11+) | Developer ID signed, but the release ZIP contains AppleDouble metadata that breaks the signature seal; the cask clears quarantine and re-signs locally. Application, daemon, session, and telemetry data live under `~/.ao` and are removed by `zap`. |
 | `clearly` | Native Markdown editor with live preview (universal, macOS 15+) | Developer ID signed and notarized; uses the Sparkle appcast for `livecheck` and supports automatic updates. Scratchpads and preferences are removed by `zap`. |
 | `junie` | JetBrains Junie AI coding agent CLI (Apple Silicon & Intel) | Developer ID signed and notarized; no `postflight` needed. Installs `junie.app` and links the CLI onto PATH. Updates via `brew upgrade`, not the binary's built-in self-updater. |
 | `mowglii-mdv` | Native Markdown viewer with Quick Look and a command-line tool (universal, macOS 13+) | Developer ID signed and notarized; uses Mowglii's pinned S3 release artifact and Sparkle appcast for `livecheck` and in-app updates. The optional command-line tool is installed from the app menu. |
