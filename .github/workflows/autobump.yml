@@ -67,7 +67,7 @@ jobs:
           HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git_setup.outputs.email }}
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
-          for package in clearly junie kero localvoxtral mac-dictate-anywhere mowglii-mdv nativ tqbf-mdv prime-agent waku; do
+          for package in clearly junie kero localvoxtral mac-dictate-anywhere mowglii-mdv tqbf-mdv prime-agent waku; do
             brew bump --no-fork --open-pr "$TAP_NAME/$package"
           done
 
@@ -164,7 +164,16 @@ jobs:
           git checkout -b "$BRANCH"
           git add Casks/optcgsim.rb
           git commit -m "optcgsim ${{ steps.update.outputs.version }}"
-          git push origin "$BRANCH"
+           for attempt in 1 2 3; do
+             if git push origin "$BRANCH"; then
+               break
+             fi
+             if [ "$attempt" -eq 3 ]; then
+               echo "git push failed after $attempt attempts" >&2
+               exit 1
+             fi
+             sleep $((attempt * 5))
+           done
           BODY="Automated bump of \`optcgsim\` to \`${{ steps.update.outputs.version }}\` via \`scripts/update-optcgsim.sh\`.
 
           - Version from RSS feed: https://optcgsim.com/feed/
@@ -239,7 +248,16 @@ jobs:
           git checkout -b "$branch"
           git add "Formula/${{ matrix.formula }}.rb"
           git commit -m "${{ matrix.formula }} ${{ steps.update.outputs.version }}"
-          git push origin "$branch"
+           for attempt in 1 2 3; do
+             if git push origin "$branch"; then
+               break
+             fi
+             if [ "$attempt" -eq 3 ]; then
+               echo "git push failed after $attempt attempts" >&2
+               exit 1
+             fi
+             sleep $((attempt * 5))
+           done
           gh pr create --title "${{ matrix.formula }} ${{ steps.update.outputs.version }}" --body "Automated architecture-aware bump via scripts/update-arch-formula.sh."
 
   bump-junie-local:
@@ -333,7 +351,16 @@ jobs:
           git checkout -b "$BRANCH"
           git add Formula/junie-local.rb
           git commit -m "junie-local ${{ steps.update.outputs.version }}"
-          git push origin "$BRANCH"
+           for attempt in 1 2 3; do
+             if git push origin "$BRANCH"; then
+               break
+             fi
+             if [ "$attempt" -eq 3 ]; then
+               echo "git push failed after $attempt attempts" >&2
+               exit 1
+             fi
+             sleep $((attempt * 5))
+           done
           BODY="Automated bump of \`junie-local\` to \`${{ steps.update.outputs.version }}\` (\`${{ steps.update.outputs.sha }}\`) via \`scripts/update-junie-local.sh\`.
 
           - Pin: \`local/install.sh\` at \`${{ steps.update.outputs.sha }}\` from https://github.com/jetbrains-junie/junie
