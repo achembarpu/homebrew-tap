@@ -53,9 +53,10 @@ casks. Run `./scripts/add-cask.sh --help` for its options.
   but does not provide the token scope required by Homebrew's `--open-pr` helper.
 
 - `autobump` — `brew bump --no-fork --open-pr` for every supported
-  `livecheck`-enabled cask/formula (`clearly`, `junie`, `localvoxtral`,
-  `mac-dictate-anywhere`, `kero`, `mowglii-mdv`, `prime-agent`, `tqbf-mdv`,
-  `waku`, `zeron`). `qwen-code` and `maki`
+  `livecheck`-enabled cask/formula (`agent-orchestrator`, `clearly`,
+  `deepseek-harness`, `junie`, `kero`, `localvoxtral`, `mac-dictate-anywhere`,
+  `mowglii-mdv`, `podium`, `prime-agent`, `superset`, `tqbf-mdv`,
+  `tuicommander`, `waku`, `writer-computer`, `zeron`). `qwen-code` and `maki`
   are excluded because Homebrew's generic bump parser cannot rewrite their
   architecture-specific URL stanzas; `bump-arch-formulae` uses the dedicated
   updater instead. Do not use `no_autobump!` in this personal tap because

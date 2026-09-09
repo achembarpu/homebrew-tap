@@ -1,11 +1,15 @@
 cask "superset" do
   arch arm: "arm64", intel: "x64"
 
-  version "1.26.0"
-  sha256 arm:   "ee1fe264a65aac26835055683cd6b2ecc6724c253ada3466c4a5c93c9d88dd9f",
-         intel: "07a77799a0a6f104ad65316fe9f2b8a7bdded1399a9621b2d975018797f1402d"
+  version "1.28.0"
+  sha256 arm:   "4d8baa901c27037d6325deba1f81fd8b005b1e945cf6b1795fd9a4cd12c1b78e",
+         intel: "1189007d4c69f50270b7fb2be92907867dc69900291de9a8db112a126c07d8a3"
 
-  url "https://github.com/superset-sh/superset/releases/download/desktop-v#{version}/Superset-#{version}-#{arch}-mac.zip"
+  # The Intel release also has a versionless asset alias; keep the immutable
+  # desktop-v#{version} release path as the version authority.
+  artifact_name = "Superset"
+  artifact_name += "-#{version}" if arch == "arm64"
+  url "https://github.com/superset-sh/superset/releases/download/desktop-v#{version}/#{artifact_name}-#{arch}-mac.zip"
   name "Superset"
   desc "Agentic IDE for orchestrating coding agents"
   homepage "https://github.com/superset-sh/superset"

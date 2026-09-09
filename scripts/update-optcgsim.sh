@@ -6,7 +6,7 @@ set -euo pipefail
 # optcgsim has no GitHub releases, no livecheck, and no published checksums:
 # the Mac Dropbox link on https://optcgsim.com/ and a Google Drive mirror. The
 # Dropbox filename segment is VESTIGIAL (it currently says 1_30d_Mac.zip while
-# the zip holds the 1.42c build). The version authority is the site's WordPress
+# the zip holds the 1.43a build). The version authority is the site's WordPress
 # RSS feed (https://optcgsim.com/feed/), the URLs come from scraping the Mac
 # download section, and the sha256 is computed from a fresh download (~711 MiB).
 # The script aborts rather than rewrite the cask if neither download confirms

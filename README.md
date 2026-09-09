@@ -118,7 +118,8 @@ default Actions `GITHUB_TOKEN`.
 
 - `autobump` — runs `brew bump --no-fork --open-pr <package>` for each
   supported livecheck-enabled cask and formula handled by the generic path,
-  including `prime-agent` and `zeron`. Each automated package gets its own PR.
+  including `deepseek-harness`, `prime-agent`, and `zeron`. Each automated
+  package gets its own PR.
   The job de-duplicates against open PRs and runs `brew audit` and `brew style`
   inline.
 

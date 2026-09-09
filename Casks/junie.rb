@@ -1,9 +1,9 @@
 cask "junie" do
   arch arm: "aarch64", intel: "amd64"
 
-  version "3110.6"
-  sha256 arm:   "3ca79a6a59c4866460294efce63838f5d89b81ecbb3c74d2ff2299b063e17292",
-         intel: "58caa4fc0d5c8faf357ff3e4ac96a93e1c3275cf9c105bcd9ea1c0fb438d2083"
+  version "3110.7"
+  sha256 arm:   "29a70cb48bc156f6dd6b02afe8438c930876c225875ec9c248b37440c70ad92e",
+         intel: "9978a63a92f77eacb02709076f6c3782813f023566229ed909f3aa83ade44fa3"
 
   url "https://github.com/JetBrains/junie/releases/download/#{version}/junie-release-#{version}-macos-#{arch}.zip"
   name "Junie"

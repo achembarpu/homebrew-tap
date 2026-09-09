@@ -37,7 +37,7 @@ cask "optcgsim" do
   ]
 
   caveats <<~EOS
-    The cask pins the site's current Mac build (1.42c), served from the site's
+    The cask pins the site's current Mac build (1.43a), served from the site's
     Dropbox link, which is still named 1_30d_Mac.zip. Since v1.40a the app
     self-patches offline minor versions in-app, but online-launchable versions
     require a cask update and cannot be upgraded by the auto-patcher.
