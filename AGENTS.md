@@ -52,9 +52,10 @@ casks. Run `./scripts/add-cask.sh --help` for its options.
   repository-scoped GitHub token. The Actions `GITHUB_TOKEN` can push branches
   but does not provide the token scope required by Homebrew's `--open-pr` helper.
 
-- `autobump` — `brew bump --no-fork --open-pr` for every `livecheck`-enabled
-  cask/formula (`clearly`, `junie`, `localvoxtral`, `mac-dictate-anywhere`,
-  `kero`, `mowglii-mdv`, `prime-agent`, `tqbf-mdv`, `waku`). `qwen-code` and `maki`
+- `autobump` — `brew bump --no-fork --open-pr` for every supported
+  `livecheck`-enabled cask/formula (`clearly`, `junie`, `localvoxtral`,
+  `mac-dictate-anywhere`, `kero`, `mowglii-mdv`, `prime-agent`, `tqbf-mdv`,
+  `waku`, `zeron`). `qwen-code` and `maki`
   are excluded because Homebrew's generic bump parser cannot rewrite their
   architecture-specific URL stanzas; `bump-arch-formulae` uses the dedicated
   updater instead. Do not use `no_autobump!` in this personal tap because

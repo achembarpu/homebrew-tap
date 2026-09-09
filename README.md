@@ -117,9 +117,10 @@ repository-scoped GitHub token because Homebrew's PR helper cannot use the
 default Actions `GITHUB_TOKEN`.
 
 - `autobump` — runs `brew bump --no-fork --open-pr <package>` for each
-  livecheck-enabled cask and formula handled by the generic path, including
-  `prime-agent`. Each automated package gets its own PR. The job de-duplicates
-  against open PRs and runs `brew audit` and `brew style` inline.
+  supported livecheck-enabled cask and formula handled by the generic path,
+  including `prime-agent` and `zeron`. Each automated package gets its own PR.
+  The job de-duplicates against open PRs and runs `brew audit` and `brew style`
+  inline.
 
 - `bump-optcgsim` — runs `scripts/update-optcgsim.sh` (see above) and opens a
   PR with `peter-evans/create-pull-request` when the RSS version differs.
