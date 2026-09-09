@@ -24,6 +24,8 @@ class PrimeAgent < Formula
       zeromq_arch = "arm64"
     end
 
+    # npm installs only host-compatible optional native artifacts, so these
+    # opposite-architecture directories may not exist.
     [
       native_modules / "koffi/build/koffi/#{koffi_arch}",
       native_modules / "zeromq/build/darwin/#{zeromq_arch}",
