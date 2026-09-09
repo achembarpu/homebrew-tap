@@ -17,11 +17,18 @@ class PrimeAgent < Formula
 
     native_modules = libexec / "lib/node_modules/prime-agent/node_modules"
     if Hardware::CPU.arm?
-      rm_r native_modules / "koffi/build/koffi/darwin_x64"
-      rm_r native_modules / "zeromq/build/darwin/x64"
+      koffi_arch = "darwin_x64"
+      zeromq_arch = "x64"
     else
-      rm_r native_modules / "koffi/build/koffi/darwin_arm64"
-      rm_r native_modules / "zeromq/build/darwin/arm64"
+      koffi_arch = "darwin_arm64"
+      zeromq_arch = "arm64"
+    end
+
+    [
+      native_modules / "koffi/build/koffi/#{koffi_arch}",
+      native_modules / "zeromq/build/darwin/#{zeromq_arch}",
+    ].each do |obsolete_module|
+      rm_r obsolete_module if obsolete_module.exist?
     end
 
     bin.install_symlink libexec / "bin/prime-agent"
