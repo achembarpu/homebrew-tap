@@ -51,6 +51,7 @@ user data manually using the command in the formula's caveats.
 | `tuicommander` | AI-native IDE for orchestrating coding agents (Apple Silicon, macOS 10.13+) | Developer ID signed and notarized; checks for updates on startup. The current macOS release is Apple Silicon only. Application data is removed by `zap`. |
 | `waku` | Native app for local coding agents (Apple Silicon, macOS 13+) | Developer ID signed and notarized; uses Sparkle for in-app updates. Projects, sessions, and transcripts are stored locally and removed by `zap`. |
 | `writer-computer` | Native Markdown writing environment (Apple Silicon, macOS 10.15+) | Developer ID signed and notarized; uses its in-app updater and the pinned GitHub DMG. App data is removed by `zap`. |
+| `zeron` | Desktop app for controlling coding agents locally (Apple Silicon, macOS 12+) | Developer ID signed and notarized; includes an in-app updater and optional multi-device workspace sync. Local data under `~/.zeron` is removed by `zap`. |
 
 ## Formulas
 
