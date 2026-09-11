@@ -34,25 +34,42 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
 API_ARGS=(-fsSL --retry 3 --connect-timeout 15 -H 'Accept: application/vnd.github+json')
 [[ -n "$TOKEN" ]] && API_ARGS+=(-H "Authorization: Bearer $TOKEN")
-curl "${API_ARGS[@]}" "https://api.github.com/repos/$REPO/releases/latest" -o "$TMP_DIR/release.json"
+curl "${API_ARGS[@]}" "https://api.github.com/repos/$REPO/releases?per_page=100" -o "$TMP_DIR/releases.json"
 
-RELEASE_META="$(python3 - "$TMP_DIR/release.json" "$FORMULA" <<'PY'
-import json, sys
-j = json.load(open(sys.argv[1]))
-tag = j.get("tag_name", "")
-if not tag.startswith("v"):
-    raise SystemExit("release tag is not v-prefixed")
-version = tag[1:]
-names = {a["name"]: a["browser_download_url"] for a in j.get("assets", [])}
-if len(sys.argv) > 2 and sys.argv[2] == "maki":
-    arm = f"maki-v{version}-aarch64-apple-darwin.tar.gz"
-    intel = f"maki-v{version}-x86_64-apple-darwin.tar.gz"
+RELEASE_META="$(python3 - "$TMP_DIR/releases.json" "$FORMULA" <<'PY'
+import json, re, sys
+releases = json.load(open(sys.argv[1]))
+formula = sys.argv[2]
+
+if formula == "maki":
+    asset_names = lambda version: (
+        f"maki-v{version}-aarch64-apple-darwin.tar.gz",
+        f"maki-v{version}-x86_64-apple-darwin.tar.gz",
+    )
 else:
-    arm, intel = "qwen-code-darwin-arm64.tar.gz", "qwen-code-darwin-x64.tar.gz"
-for name in (arm, intel):
-    if name not in names:
-        raise SystemExit(f"release is missing asset: {name}")
-print(version, names[arm], names[intel])
+    asset_names = lambda version: (
+        "qwen-code-darwin-arm64.tar.gz",
+        "qwen-code-darwin-x64.tar.gz",
+    )
+
+# The repository publishes SDK, desktop, and CLI releases.  Do not use
+# /releases/latest: GitHub considers the most recently published release
+# "latest", even when it is for a different product.
+for release in releases:
+    if release.get("draft") or release.get("prerelease"):
+        continue
+    tag = release.get("tag_name", "")
+    match = re.fullmatch(r"v(\d+(?:\.\d+)+)", tag)
+    if not match:
+        continue
+    version = match.group(1)
+    names = {a["name"]: a["browser_download_url"] for a in release.get("assets", [])}
+    arm, intel = asset_names(version)
+    if arm in names and intel in names:
+        print(version, names[arm], names[intel])
+        break
+else:
+    raise SystemExit("could not find a stable release with both macOS architecture assets")
 PY
 )"
 read -r TARGET_VERSION ARM_URL INTEL_URL <<< "$RELEASE_META"
