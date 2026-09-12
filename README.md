@@ -57,6 +57,7 @@ user data manually using the command in the formula's caveats.
 
 | Formula | What | Notes |
 | --- | --- | --- |
+| `atomic` | Verifiable coding agent runtime | Uses Atomic's pinned self-contained macOS release archive. Authentication, settings, sessions, and other user data live under ~/.atomic. Upstream does not provide a built-in sandbox or command-level shell permission gate. |
 | `junie-local` | `junie-local-setup` command for the optional local model of the `junie` cask (JetBrains MLX engine + Qwen weights) | Vendored verbatim at a pinned upstream revision — no curl pipes. Upstream hard-gates: Apple M5+, >=40 GB RAM, macOS 26+. Downloads land in ~/.local/share/junie-local, outside brew. |
 | `prime-agent` | Self-improving coding and research agent | Node.js formula using the pinned GitHub release package. Requires Node.js 22; npm dependencies are installed into the formula keg. User data under ~/.prime/agent is not removed on uninstall. |
 | `deepseek-harness` | Plugin-based AI agent harness (`dsh`) | Node.js formula using the pinned npm release package. Uses Homebrew's Node.js and pnpm dependencies; npm dependencies are installed into the formula keg. Profiles, credentials, sessions, and user-installed plugins live under ~/.dsh. Upstream does not guarantee sandbox isolation. |
