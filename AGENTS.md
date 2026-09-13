@@ -55,7 +55,7 @@ casks. Run `./scripts/add-cask.sh --help` for its options.
 - `autobump` — `brew bump --no-fork --open-pr` for every supported
   `livecheck`-enabled cask/formula (`agent-orchestrator`, `clearly`,
   `deepseek-harness`, `junie`, `kero`, `localvoxtral`, `mac-dictate-anywhere`,
-  `mowglii-mdv`, `podium`, `prime-agent`, `superset`, `tqbf-mdv`,
+  `mowglii-mdv`, `podium`, `prime-agent`, `qm`, `superset`, `tqbf-mdv`,
   `tuicommander`, `waku`, `writer-computer`, `zeron`). `qwen-code` and `maki`
   are excluded because Homebrew's generic bump parser cannot rewrite their
   architecture-specific URL stanzas; `bump-arch-formulae` uses the dedicated
@@ -90,5 +90,5 @@ committing.
 ## Scope
 
 - Casks wrap GUI apps from GitHub releases with `.zip` (preferred) or `.dmg` assets that contain a `.app` bundle. The documented non-GitHub exceptions are `kero`, which uses the upstream project's pinned R2 DMG and Sparkle appcast, and `mowglii-mdv`, which uses Mowglii's pinned S3 DMG and Sparkle appcast.
-- Formulas wrap CLI tools and scripts that do not contain a `.app` bundle. Each formula pins an upstream artifact with an exact version and `sha256` (explicitly or through an immutable versioned release URL), no live fetches, no vendored binaries unless the build is from source. Use a GitHub release asset where available; the documented exceptions are `junie-local` (a pinned raw upstream script), `optcgsim` (a site-hosted app archive), and `prime-agent` (an npm tarball whose declared dependencies are resolved during the build). See `junie-local` for a script wrapper and `prime-agent` for an npm tarball pattern.
+- Formulas wrap CLI tools and scripts that do not contain a `.app` bundle. Each formula pins an upstream artifact with an exact version and `sha256` (explicitly or through an immutable versioned release URL), no live fetches, no vendored binaries unless the build is from source. Use a GitHub release asset where available; the documented exceptions are `junie-local` (a pinned raw upstream script), `optcgsim` (a site-hosted app archive), and `prime-agent` and `qm` (npm tarballs whose declared dependencies are resolved during the build). See `junie-local` for a script wrapper and `prime-agent` for an npm tarball pattern.
 - Uninstall runs `brew uninstall --cask --zap <name>` for casks (data paths come from the cask's `zap`) and `brew uninstall <name>` for formulae.

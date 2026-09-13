@@ -63,6 +63,7 @@ user data manually using the command in the formula's caveats.
 | `deepseek-harness` | Plugin-based AI agent harness (`dsh`) | Node.js formula using the pinned npm release package. Uses Homebrew's Node.js and pnpm dependencies; npm dependencies are installed into the formula keg. Profiles, credentials, sessions, and user-installed plugins live under ~/.dsh. Upstream does not guarantee sandbox isolation. |
 | `qwen-code` | Open-source AI coding agent for the terminal (Apple Silicon & Intel, macOS) | Uses Qwen Code's pinned standalone macOS release and bundled Node.js runtime. `scripts/update-arch-formula.sh` updates both architecture assets. User configuration is not removed on uninstall. |
 | `maki` | Efficient AI coding agent with Lua plugins (Apple Silicon & Intel, macOS) | Uses Maki's pinned native macOS release. `scripts/update-arch-formula.sh` updates both architecture assets. User configuration and sessions are not removed on uninstall. |
+| `qm` | Deployment CLI for portable QM deployments | Node.js formula using the pinned npm package. Deployments require their target-specific tools and credentials, and deployment directories are not removed on uninstall. |
 | `yknotify` | CLI that detects when a YubiKey needs touch on macOS | Built from an immutable, commit-pinned source archive because upstream has no releases or tags; emits JSON events to stdout. Optional fixed macOS notifications run in a Homebrew-managed LaunchAgent after `brew services start yknotify`. |
 
 ## Adding a cask or formula
@@ -120,7 +121,7 @@ default Actions `GITHUB_TOKEN`.
 
 - `autobump` — runs `brew bump --no-fork --open-pr <package>` for each
   supported livecheck-enabled cask and formula handled by the generic path,
-  including `deepseek-harness`, `prime-agent`, and `zeron`. Each automated
+  including `deepseek-harness`, `prime-agent`, `qm`, and `zeron`. Each automated
   package gets its own PR.
   The job de-duplicates against open PRs and runs `brew audit` and `brew style`
   inline.

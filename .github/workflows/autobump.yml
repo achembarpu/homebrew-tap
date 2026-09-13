@@ -67,7 +67,7 @@ jobs:
           HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git_setup.outputs.email }}
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
-          for package in agent-orchestrator clearly deepseek-harness junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent superset tqbf-mdv tuicommander waku writer-computer zeron; do
+          for package in agent-orchestrator clearly deepseek-harness junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent qm superset tqbf-mdv tuicommander waku writer-computer zeron; do
             brew bump --no-fork --open-pr "$TAP_NAME/$package"
           done
 
