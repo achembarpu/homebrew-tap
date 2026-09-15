@@ -226,8 +226,12 @@ STYLE_OK=1
 AUDIT_OK=1
 AUDIT_NOTE=""
 if [ -n "$TAP_FORMULA" ] && [ -f "$TAP_FORMULA" ]; then
-  printf 'Syncing formula to tap copy %s...\n' "$TAP_FORMULA" >&2
-  cp "$FORMULA_FILE" "$TAP_FORMULA"
+  if cmp -s "$FORMULA_FILE" "$TAP_FORMULA"; then
+    printf 'Tap copy already matches %s.\n' "$TAP_FORMULA" >&2
+  else
+    printf 'Syncing formula to tap copy %s...\n' "$TAP_FORMULA" >&2
+    cp "$FORMULA_FILE" "$TAP_FORMULA"
+  fi
 else
   AUDIT_NOTE=" (audit needs the tap: brew tap achembarpu/tap)"
 fi

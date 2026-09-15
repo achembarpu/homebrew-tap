@@ -51,7 +51,9 @@ jobs:
       # generic path downloads a new artifact, recomputes sha256, rewrites the
       # versioned URL and checksum, runs `brew audit`/`brew style`,
       # de-duplicates against open PRs, and opens one PR per outdated package
-      # with --no-fork (branch pushed directly to this repo).
+      # with --no-fork (branch pushed directly to this repo). `--full-name`
+      # keeps `brew bump`/`brew bump-cask-pr` on this tap when a package also
+      # exists in Homebrew/cask (for example, superset).
       # HOMEBREW_GITHUB_API_TOKEN must be a repository-scoped PAT. The default
       # Actions GITHUB_TOKEN has no API token scopes for Homebrew's PR helper.
       #
@@ -68,7 +70,7 @@ jobs:
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
           for package in agent-orchestrator clearly deepseek-harness junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent qm superset tqbf-mdv tuicommander waku writer-computer zeron; do
-            brew bump --no-fork --open-pr "$TAP_NAME/$package"
+            brew bump --full-name --no-fork --open-pr "$TAP_NAME/$package"
           done
 
   bump-optcgsim:
