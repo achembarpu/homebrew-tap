@@ -168,15 +168,15 @@ jobs:
             echo "Branch $BRANCH already exists on remote, skipping"
             exit 0
           fi
-          git checkout -b "$BRANCH"
-          git add Casks/optcgsim.rb
-          git commit -m "optcgsim ${{ steps.update.outputs.version }}"
+           git checkout -b "$BRANCH"
+           git add Casks/optcgsim.rb
+           git commit -m "optcgsim ${{ steps.update.outputs.version }}"
            for attempt in 1 2 3 4 5; do
-             if git push origin "$BRANCH"; then
+             if gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/heads/$BRANCH" -f "sha=$(git rev-parse HEAD)"; then
                break
              fi
              if [ "$attempt" -eq 5 ]; then
-               echo "git push failed after $attempt attempts" >&2
+               echo "Creating branch failed after $attempt attempts" >&2
                exit 1
              fi
              sleep $((attempt * 5))
@@ -252,15 +252,15 @@ jobs:
         run: |
           branch="bump-${{ matrix.formula }}-${{ steps.update.outputs.version }}"
           if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then exit 0; fi
-          git checkout -b "$branch"
-          git add "Formula/${{ matrix.formula }}.rb"
-          git commit -m "${{ matrix.formula }} ${{ steps.update.outputs.version }}"
+           git checkout -b "$branch"
+           git add "Formula/${{ matrix.formula }}.rb"
+           git commit -m "${{ matrix.formula }} ${{ steps.update.outputs.version }}"
            for attempt in 1 2 3 4 5; do
-             if git push origin "$branch"; then
+             if gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/heads/$branch" -f "sha=$(git rev-parse HEAD)"; then
                break
              fi
              if [ "$attempt" -eq 5 ]; then
-               echo "git push failed after $attempt attempts" >&2
+               echo "Creating branch failed after $attempt attempts" >&2
                exit 1
              fi
              sleep $((attempt * 5))
@@ -355,15 +355,15 @@ jobs:
             echo "Branch $BRANCH already exists on remote, skipping"
             exit 0
           fi
-          git checkout -b "$BRANCH"
-          git add Formula/junie-local.rb
-          git commit -m "junie-local ${{ steps.update.outputs.version }}"
+           git checkout -b "$BRANCH"
+           git add Formula/junie-local.rb
+           git commit -m "junie-local ${{ steps.update.outputs.version }}"
            for attempt in 1 2 3 4 5; do
-             if git push origin "$BRANCH"; then
+             if gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/heads/$BRANCH" -f "sha=$(git rev-parse HEAD)"; then
                break
              fi
              if [ "$attempt" -eq 5 ]; then
-               echo "git push failed after $attempt attempts" >&2
+               echo "Creating branch failed after $attempt attempts" >&2
                exit 1
              fi
              sleep $((attempt * 5))
