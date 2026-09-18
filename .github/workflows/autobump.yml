@@ -80,7 +80,7 @@ jobs:
 
   bump-optcgsim:
     name: Bump optcgsim (non-GitHub)
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     timeout-minutes: 30
     permissions:
       contents: write
@@ -172,11 +172,11 @@ jobs:
            git add Casks/optcgsim.rb
            git commit -m "optcgsim ${{ steps.update.outputs.version }}"
            for attempt in 1 2 3 4 5; do
-             if gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/heads/$BRANCH" -f "sha=$(git rev-parse HEAD)"; then
+             if git push origin "$BRANCH"; then
                break
              fi
              if [ "$attempt" -eq 5 ]; then
-               echo "Creating branch failed after $attempt attempts" >&2
+               echo "git push failed after $attempt attempts" >&2
                exit 1
              fi
              sleep $((attempt * 5))
@@ -256,11 +256,11 @@ jobs:
            git add "Formula/${{ matrix.formula }}.rb"
            git commit -m "${{ matrix.formula }} ${{ steps.update.outputs.version }}"
            for attempt in 1 2 3 4 5; do
-             if gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/heads/$branch" -f "sha=$(git rev-parse HEAD)"; then
+             if git push origin "$branch"; then
                break
              fi
              if [ "$attempt" -eq 5 ]; then
-               echo "Creating branch failed after $attempt attempts" >&2
+               echo "git push failed after $attempt attempts" >&2
                exit 1
              fi
              sleep $((attempt * 5))
@@ -269,7 +269,7 @@ jobs:
 
   bump-junie-local:
     name: Bump junie-local (pinned script)
-    runs-on: ubuntu-latest
+    runs-on: macos-14
     timeout-minutes: 20
     permissions:
       contents: write
@@ -359,11 +359,11 @@ jobs:
            git add Formula/junie-local.rb
            git commit -m "junie-local ${{ steps.update.outputs.version }}"
            for attempt in 1 2 3 4 5; do
-             if gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/heads/$BRANCH" -f "sha=$(git rev-parse HEAD)"; then
+             if git push origin "$BRANCH"; then
                break
              fi
              if [ "$attempt" -eq 5 ]; then
-               echo "Creating branch failed after $attempt attempts" >&2
+               echo "git push failed after $attempt attempts" >&2
                exit 1
              fi
              sleep $((attempt * 5))
