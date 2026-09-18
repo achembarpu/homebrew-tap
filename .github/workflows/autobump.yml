@@ -46,6 +46,7 @@ jobs:
           tap_root="$(brew --repository "$TAP_NAME")"
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git -C "$tap_root" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
+          git -C "$tap_root" config --local http.version HTTP/1.1
 
       # brew bump checks each livecheck-enabled package in this list. The
       # generic path downloads a new artifact, recomputes sha256, rewrites the
@@ -70,6 +71,10 @@ jobs:
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
           for package in agent-orchestrator clearly deepseek-harness junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent qm superset tqbf-mdv tuicommander waku writer-computer zeron; do
+            if gh pr list --state open --search "$package in:title" --json number --jq 'length > 0' | grep -qx true; then
+              echo "Skipping $package: an open bump pull request already exists"
+              continue
+            fi
             brew bump --full-name --no-fork --open-pr "$TAP_NAME/$package"
           done
 
@@ -96,6 +101,7 @@ jobs:
         run: |
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
+          git config --local http.version HTTP/1.1
 
       - name: Check for optcgsim update
         id: check
@@ -166,11 +172,11 @@ jobs:
           git checkout -b "$BRANCH"
           git add Casks/optcgsim.rb
           git commit -m "optcgsim ${{ steps.update.outputs.version }}"
-           for attempt in 1 2 3; do
+           for attempt in 1 2 3 4 5; do
              if git push origin "$BRANCH"; then
                break
              fi
-             if [ "$attempt" -eq 3 ]; then
+             if [ "$attempt" -eq 5 ]; then
                echo "git push failed after $attempt attempts" >&2
                exit 1
              fi
@@ -215,6 +221,7 @@ jobs:
         run: |
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
+          git config --local http.version HTTP/1.1
       - name: Check for update
         id: check
         env:
@@ -250,11 +257,11 @@ jobs:
           git checkout -b "$branch"
           git add "Formula/${{ matrix.formula }}.rb"
           git commit -m "${{ matrix.formula }} ${{ steps.update.outputs.version }}"
-           for attempt in 1 2 3; do
+           for attempt in 1 2 3 4 5; do
              if git push origin "$branch"; then
                break
              fi
-             if [ "$attempt" -eq 3 ]; then
+             if [ "$attempt" -eq 5 ]; then
                echo "git push failed after $attempt attempts" >&2
                exit 1
              fi
@@ -285,6 +292,7 @@ jobs:
         run: |
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
+          git config --local http.version HTTP/1.1
 
       - name: Check for junie-local update
         id: check
@@ -353,11 +361,11 @@ jobs:
           git checkout -b "$BRANCH"
           git add Formula/junie-local.rb
           git commit -m "junie-local ${{ steps.update.outputs.version }}"
-           for attempt in 1 2 3; do
+           for attempt in 1 2 3 4 5; do
              if git push origin "$BRANCH"; then
                break
              fi
-             if [ "$attempt" -eq 3 ]; then
+             if [ "$attempt" -eq 5 ]; then
                echo "git push failed after $attempt attempts" >&2
                exit 1
              fi
