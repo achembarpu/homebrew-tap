@@ -50,9 +50,10 @@ jobs:
 
       # brew bump checks each livecheck-enabled package in this list. The
       # generic path downloads a new artifact, recomputes sha256, rewrites the
-      # versioned URL and checksum, runs `brew audit`/`brew style`,
-      # de-duplicates against open PRs, and opens one PR per outdated package
-      # with --no-fork (branch pushed directly to this repo). `--full-name`
+      # versioned URL and checksum, runs `brew audit`/`brew style`, and opens
+      # one PR per outdated package with --no-fork (branch pushed directly to
+      # this repo). An open PR for an older version is closed before creating
+      # its replacement; an equivalent PR is kept. `--full-name`
       # keeps `brew bump`/`brew bump-cask-pr` on this tap when a package also
       # exists in Homebrew/cask (for example, superset).
       # HOMEBREW_GITHUB_API_TOKEN must be a repository-scoped PAT. The default
@@ -71,10 +72,22 @@ jobs:
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
           for package in agent-orchestrator clearly deepseek-harness junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent qm superset tqbf-mdv tuicommander waku writer-computer zeron; do
-            if gh pr list --state open --search "$package in:title" --json number --jq 'length > 0' | grep -qx true; then
-              echo "Skipping $package: an open bump pull request already exists"
+            livecheck="$(brew livecheck --json "$TAP_NAME/$package")"
+            latest="$(jq -r '.[0].version.latest // empty' <<<"$livecheck")"
+            outdated="$(jq -r '.[0].version.outdated' <<<"$livecheck")"
+            if [ "$outdated" != true ]; then
+              echo "Skipping $package: already up to date"
               continue
             fi
+
+            open_prs="$(gh pr list --state open --search "$package in:title" --json number,title | jq -r --arg prefix "$package " '.[] | select(.title | startswith($prefix)) | .number')"
+            if gh pr list --state open --search "\"$package $latest\" in:title" --json title | jq -e --arg title "$package $latest" 'any(.[]; .title == $title)' >/dev/null; then
+              echo "Skipping $package: open PR already targets $latest"
+              continue
+            fi
+            for pr in $open_prs; do
+              gh pr close "$pr" --delete-branch --comment "Superseded by the automated $package $latest bump."
+            done
             brew bump --full-name --no-fork --open-pr "$TAP_NAME/$package"
           done
 
