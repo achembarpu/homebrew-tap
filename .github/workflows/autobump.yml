@@ -89,7 +89,7 @@ jobs:
       - name: Checkout tap
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node 24, pinned)
         with:
-          persist-credentials: true
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Set up Homebrew (for brew style/audit)
@@ -101,7 +101,6 @@ jobs:
         run: |
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
-          git config --local http.version HTTP/1.1
 
       - name: Check for optcgsim update
         id: check
@@ -210,7 +209,7 @@ jobs:
       - name: Checkout tap
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node 24, pinned)
         with:
-          persist-credentials: true
+          persist-credentials: false
           fetch-depth: 0
       - name: Set up Homebrew
         uses: Homebrew/actions/setup-homebrew@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
@@ -221,7 +220,6 @@ jobs:
         run: |
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
-          git config --local http.version HTTP/1.1
       - name: Check for update
         id: check
         env:
@@ -280,7 +278,7 @@ jobs:
       - name: Checkout tap
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 (Node 24, pinned)
         with:
-          persist-credentials: true
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Set up Homebrew (for brew style/audit)
@@ -292,7 +290,6 @@ jobs:
         run: |
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
-          git config --local http.version HTTP/1.1
 
       - name: Check for junie-local update
         id: check
