@@ -1,6 +1,6 @@
 cask "localvoxtral" do
-  version "0.8.4"
-  sha256 "20eb046ca113233364708c7445ae0e52609eefcbc89a25f8699522ef7cbfe837"
+  version "0.9.0"
+  sha256 "ea961909a240fc7418dfea2eabee519a94b61efbcb1d62ab636e6e872c874df0"
 
   url "https://github.com/T0mSIlver/localvoxtral/releases/download/v#{version}/localvoxtral-v#{version}.zip"
   name "localvoxtral"
