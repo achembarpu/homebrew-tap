@@ -1,9 +1,9 @@
 cask "superset" do
   arch arm: "arm64", intel: "x64"
 
-  version "1.29.0"
-  sha256 arm:   "b52dde23536c09abf6c40bd915ea157f2373553677dd6e427c144d0f7d0450aa",
-         intel: "fa3c55a33a572d4875999caee0124b86fcc174438f274f5910713a47422d82d1"
+  version "1.30.0"
+  sha256 arm:   "442d0f8ac5fa639d4ef016911f9a7f919ff01aaa391663bfebfa7ff0c7434777",
+         intel: "c779e54bae7c84663b0e451a60f881029f386f1f1e0a5b70da1f729d7cec3f14"
 
   # The Intel release also has a versionless asset alias; keep the immutable
   # desktop-v#{version} release path as the version authority.
