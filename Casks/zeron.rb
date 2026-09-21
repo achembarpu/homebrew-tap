@@ -2,13 +2,13 @@ cask "zeron" do
   version "0.2.79"
   sha256 "4b1742de20039b81adc5329d856c51d052776eb4fa9594531662b45f276dc5ca"
 
-  url "https://github.com/zeronsh/comet/releases/download/v#{version}/zeron-#{version}-macos-arm64.dmg"
+  url "https://github.com/zeronsh/zeron/releases/download/v#{version}/zeron-#{version}-macos-arm64.dmg"
   name "Zeron"
   desc "Control coding agents locally with optional multi-device sync"
-  homepage "https://github.com/zeronsh/comet"
+  homepage "https://github.com/zeronsh/zeron"
 
   livecheck do
-    url "https://github.com/zeronsh/comet/releases/latest"
+    url "https://github.com/zeronsh/zeron/releases/latest"
     strategy :github_latest
   end
 
