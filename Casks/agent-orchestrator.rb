@@ -1,9 +1,9 @@
 cask "agent-orchestrator" do
   arch arm: "arm64", intel: "x64"
 
-  version "0.13.0"
-  sha256 arm:   "53124dbed831082d15911e3b545f2c631851b9add618d3527954a709d9e44276",
-         intel: "65cb27985989cb2f51472ea58a0178db1dbfdc53b6f65cedf75cfb55ff8a0776"
+  version "0.13.1"
+  sha256 arm:   "4f52d44f3f2bc07455b1889af1743b7dddfceefe498f072d87aa26f0037c3d11",
+         intel: "898c8252ebf2149f5038bd75486324b20f36ce41c39a47df5903aa11d7fa6140"
 
   url "https://github.com/Untrivial-ai/agent-orchestrator/releases/download/v#{version}/agent-orchestrator-darwin-#{arch}.zip"
   name "Agent Orchestrator"
@@ -16,7 +16,7 @@ cask "agent-orchestrator" do
   end
 
   auto_updates true
-  depends_on macos: :big_sur
+  depends_on :macos
 
   app "Agent Orchestrator.app"
 
