@@ -1,6 +1,6 @@
 cask "zeron" do
-  version "0.2.101"
-  sha256 "c349e72a520541db67797c477a7809785968fa3a828ac52c3ce6d62970457666"
+  version "0.2.102"
+  sha256 "2e2a8c75fac48299698d62ed42815b23ecd41cc03d77511cbdd28440a6b1ad0b"
 
   url "https://github.com/zeronsh/zeron/releases/download/v#{version}/zeron-#{version}-macos-arm64.dmg"
   name "Zeron"
