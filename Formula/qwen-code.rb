@@ -2,11 +2,11 @@ class QwenCode < Formula
   desc "Open-source AI coding agent for the terminal"
   homepage "https://qwenlm.github.io/qwen-code-docs/en/users/overview"
   if Hardware::CPU.arm?
-    url "https://github.com/QwenLM/qwen-code/releases/download/v0.24.7/qwen-code-darwin-arm64.tar.gz"
-    sha256 "47a6d926e2f36da7260ad093c08110e9f8666e96b576dcbbc5abccd01a2a7fe1"
+    url "https://github.com/QwenLM/qwen-code/releases/download/v0.25.0/qwen-code-darwin-arm64.tar.gz"
+    sha256 "6fd20e1f817277d597d43f6496b2d2d446b7a011a3e1475b9b846c6de32848d7"
   else
-    url "https://github.com/QwenLM/qwen-code/releases/download/v0.24.7/qwen-code-darwin-x64.tar.gz"
-    sha256 "1b6e7b4c34eba2b8de223f633bb6f5c1bc16f374ff510ea6b2df5006aa0d40e2"
+    url "https://github.com/QwenLM/qwen-code/releases/download/v0.25.0/qwen-code-darwin-x64.tar.gz"
+    sha256 "1159e0e53b51e852c8fb3a44000ae394973c0e57865f639b632d9a4ddd154d6f"
   end
   license "Apache-2.0"
 
