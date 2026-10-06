@@ -17,11 +17,33 @@ cask "clearly" do
 
   app "Clearly.app"
 
-  zap trash: [
-    "~/Library/Application Support/Scratchpads",
-    "~/Library/Preferences/com.sabotage.clearly.plist",
-    "~/Library/Saved Application State/com.sabotage.clearly.savedState",
-  ]
+  uninstall quit:   "com.sabotage.clearly",
+            signal: ["TERM", "com.sabotage.clearly"]
+
+  zap script: {
+        executable: "/bin/sh",
+        args:       ["-c", <<~SH],
+          link="$HOME/.local/bin/clearly"
+          if [ -L "$link" ]; then
+            target=$(/usr/bin/readlink "$link") || exit "$?"
+            case "$target" in
+              */Clearly.app/Contents/*) /bin/rm -- "$link" ;;
+            esac
+          fi
+        SH
+        sudo:       false,
+      },
+      trash:  [
+        "~/Library/Application Support/Clearly",
+        "~/Library/Application Support/Scratchpads",
+        "~/Library/Caches/com.sabotage.clearly",
+        "~/Library/HTTPStorages/com.sabotage.clearly",
+        "~/Library/HTTPStorages/com.sabotage.clearly.binarycookies",
+        "~/Library/Logs/com.sabotage.clearly",
+        "~/Library/Preferences/com.sabotage.clearly.plist",
+        "~/Library/Saved Application State/com.sabotage.clearly.savedState",
+        "~/Library/WebKit/com.sabotage.clearly",
+      ]
 
   caveats <<~EOS
     Clearly requires macOS 15 (Sequoia) or later.

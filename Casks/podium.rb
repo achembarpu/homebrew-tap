@@ -16,15 +16,23 @@ cask "podium" do
   end
 
   auto_updates true
-  depends_on macos: :big_sur
+  depends_on :macos
 
   app "Podium.app"
 
+  uninstall quit:   "app.podium.desktop",
+            signal: ["TERM", "app.podium.desktop"]
+
   zap trash: [
+    "~/.podium",
     "~/Library/Application Support/app.podium.desktop",
     "~/Library/Caches/app.podium.desktop",
+    "~/Library/HTTPStorages/app.podium.desktop",
+    "~/Library/HTTPStorages/app.podium.desktop.binarycookies",
+    "~/Library/Logs/app.podium.desktop",
     "~/Library/Preferences/app.podium.desktop.plist",
     "~/Library/Saved Application State/app.podium.desktop.savedState",
+    "~/Library/WebKit/app.podium.desktop",
   ]
 
   caveats <<~EOS

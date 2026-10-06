@@ -18,10 +18,30 @@ cask "writer-computer" do
 
   app "Writer.app"
 
-  zap trash: [
-    "~/Library/Application Support/com.writer-computer",
-    "~/Library/Caches/com.writer-computer",
-    "~/Library/Preferences/com.writer-computer.plist",
-    "~/Library/Saved Application State/com.writer-computer.savedState",
-  ]
+  uninstall quit:   "com.writer-computer",
+            signal: ["TERM", "com.writer-computer"]
+
+  zap script: {
+        executable: "/bin/sh",
+        args:       ["-c", <<~SH],
+          link="/usr/local/bin/writer"
+          if [ -L "$link" ]; then
+            target=$(/usr/bin/readlink "$link") || exit "$?"
+            case "$target" in
+              */Writer.app/Contents/*) /bin/rm -- "$link" ;;
+            esac
+          fi
+        SH
+        sudo:       true,
+      },
+      trash:  [
+        "~/Library/Application Support/com.writer-computer",
+        "~/Library/Caches/com.writer-computer",
+        "~/Library/HTTPStorages/com.writer-computer",
+        "~/Library/HTTPStorages/com.writer-computer.binarycookies",
+        "~/Library/Logs/com.writer-computer",
+        "~/Library/Preferences/com.writer-computer.plist",
+        "~/Library/Saved Application State/com.writer-computer.savedState",
+        "~/Library/WebKit/com.writer-computer",
+      ]
 end

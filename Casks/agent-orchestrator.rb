@@ -29,7 +29,22 @@ cask "agent-orchestrator" do
         args: ["--force", "--deep", "--sign", "-", "{{appdir}}/Agent Orchestrator.app"]
   end
 
-  zap trash: "~/.ao"
+  uninstall quit:   "dev.agent-orchestrator.desktop",
+            signal: ["TERM", "dev.agent-orchestrator.desktop"]
+
+  zap trash: [
+    "~/.ao",
+    "~/Library/Application Support/Agent Orchestrator",
+    "~/Library/Caches/dev.agent-orchestrator.desktop",
+    "~/Library/Caches/dev.agent-orchestrator.desktop.ShipIt",
+    "~/Library/HTTPStorages/dev.agent-orchestrator.desktop",
+    "~/Library/HTTPStorages/dev.agent-orchestrator.desktop.binarycookies",
+    "~/Library/Logs/Agent Orchestrator",
+    "~/Library/Logs/dev.agent-orchestrator.desktop",
+    "~/Library/Preferences/dev.agent-orchestrator.desktop.plist",
+    "~/Library/Saved Application State/dev.agent-orchestrator.desktop.savedState",
+    "~/Library/WebKit/dev.agent-orchestrator.desktop",
+  ]
 
   caveats <<~EOS
     Agent Orchestrator starts a local daemon and runs the coding agent CLIs

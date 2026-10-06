@@ -17,11 +17,16 @@ cask "kero" do
 
   app "Kero.app"
 
+  uninstall quit:   "sh.kero",
+            signal: ["TERM", "sh.kero"]
+
   zap trash: [
     "~/.config/kero",
     "~/Library/Application Support/kero",
     "~/Library/Caches/sh.kero",
     "~/Library/HTTPStorages/sh.kero",
+    "~/Library/HTTPStorages/sh.kero.binarycookies",
+    "~/Library/Logs/sh.kero",
     "~/Library/Preferences/sh.kero.plist",
     "~/Library/Saved Application State/sh.kero.savedState",
     "~/Library/WebKit/sh.kero",

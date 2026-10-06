@@ -18,7 +18,19 @@ cask "zeron" do
 
   app "Zeron.app"
 
-  zap trash: "~/.zeron"
+  uninstall quit:   "sh.zeron.app",
+            signal: ["TERM", "sh.zeron.app"]
+
+  zap trash: [
+    "~/.zeron",
+    "~/Library/Caches/sh.zeron.app",
+    "~/Library/HTTPStorages/sh.zeron.app",
+    "~/Library/HTTPStorages/sh.zeron.app.binarycookies",
+    "~/Library/Logs/sh.zeron.app",
+    "~/Library/Preferences/sh.zeron.app.plist",
+    "~/Library/Saved Application State/sh.zeron.app.savedState",
+    "~/Library/WebKit/sh.zeron.app",
+  ]
 
   caveats <<~EOS
     Zeron can optionally sync workspaces across trusted devices. A synced

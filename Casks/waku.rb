@@ -18,6 +18,9 @@ cask "waku" do
 
   app "Waku.app"
 
+  uninstall quit:   "sh.waku",
+            signal: ["TERM", "sh.waku"]
+
   zap trash: [
     "~/.waku",
     "~/Library/Application Support/Waku",
@@ -25,6 +28,7 @@ cask "waku" do
     "~/Library/Caches/Waku",
     "~/Library/HTTPStorages/sh.waku",
     "~/Library/HTTPStorages/sh.waku.binarycookies",
+    "~/Library/Logs/sh.waku",
     "~/Library/Preferences/sh.waku.plist",
     "~/Library/Saved Application State/sh.waku.savedState",
     "~/Library/WebKit/sh.waku",

@@ -28,12 +28,21 @@ cask "optcgsim" do
         args: ["--force", "--deep", "--sign", "-", "{{appdir}}/OPTCGSim.app"]
   end
 
+  uninstall quit:   "com.Batsu.OPTCGSim",
+            signal: ["TERM", "com.Batsu.OPTCGSim"]
+
   zap trash: [
     "~/Library/Application Support/Batsu/OPTCGSim",
     "~/Library/Caches/Batsu/OPTCGSim",
+    "~/Library/Caches/com.Batsu.OPTCGSim",
+    "~/Library/HTTPStorages/com.Batsu.OPTCGSim",
+    "~/Library/HTTPStorages/com.Batsu.OPTCGSim.binarycookies",
     "~/Library/Logs/Batsu/OPTCGSim",
+    "~/Library/Logs/com.Batsu.OPTCGSim",
     "~/Library/Preferences/com.Batsu.OPTCGSim.plist",
     "~/Library/Saved Application State/com.Batsu.OPTCGSim.savedState",
+    "~/Library/Unity/com.Batsu.OPTCGSim",
+    "~/Library/WebKit/com.Batsu.OPTCGSim",
   ]
 
   caveats <<~EOS

@@ -19,10 +19,31 @@ cask "mowglii-mdv" do
 
   app "MDV.app"
 
-  zap trash: [
-    "~/Library/Preferences/com.mowglii.MDV.plist",
-    "~/Library/Saved Application State/com.mowglii.MDV.savedState",
-  ]
+  uninstall quit:   "com.mowglii.MDV",
+            signal: ["TERM", "com.mowglii.MDV"]
+
+  zap script: {
+        executable: "/bin/sh",
+        args:       ["-c", <<~SH],
+          link="$HOME/.local/bin/mdv"
+          if [ -L "$link" ]; then
+            target=$(/usr/bin/readlink "$link") || exit "$?"
+            case "$target" in
+              */MDV.app/Contents/*) /bin/rm -- "$link" ;;
+            esac
+          fi
+        SH
+        sudo:       false,
+      },
+      trash:  [
+        "~/Library/Caches/com.mowglii.MDV",
+        "~/Library/HTTPStorages/com.mowglii.MDV",
+        "~/Library/HTTPStorages/com.mowglii.MDV.binarycookies",
+        "~/Library/Logs/com.mowglii.MDV",
+        "~/Library/Preferences/com.mowglii.MDV.plist",
+        "~/Library/Saved Application State/com.mowglii.MDV.savedState",
+        "~/Library/WebKit/com.mowglii.MDV",
+      ]
 
   caveats <<~EOS
     MDV includes an optional command line tool. Install it from the MDV menu

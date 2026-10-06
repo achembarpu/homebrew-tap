@@ -20,10 +20,23 @@ cask "intent" do
 
   app "Intent.app"
 
+  uninstall quit:   "app.cloudlands.intent",
+            signal: ["TERM", "app.cloudlands.intent"]
+
   zap trash: [
+    "~/Library/Application Support/Intent",
     "~/Library/Application Support/intent-cloudlands",
+    "~/Library/Application Support/intentd",
+    "~/Library/Caches/app.cloudlands.intent",
+    "~/Library/Caches/app.cloudlands.intent.ShipIt",
+    "~/Library/Caches/intent-updater",
+    "~/Library/HTTPStorages/app.cloudlands.intent",
+    "~/Library/HTTPStorages/app.cloudlands.intent.binarycookies",
+    "~/Library/Logs/app.cloudlands.intent",
+    "~/Library/Logs/Intent",
     "~/Library/Preferences/app.cloudlands.intent.plist",
     "~/Library/Saved Application State/app.cloudlands.intent.savedState",
+    "~/Library/WebKit/app.cloudlands.intent",
   ]
 
   caveats <<~EOS
@@ -33,8 +46,7 @@ cask "intent" do
     Intent includes an automatic updater. To update through Homebrew, run
     `brew upgrade --cask intent`.
 
-    Workspace, note, task, and agent data belongs to the intentd daemon and is
-    stored in ~/Library/Application Support/intentd. It is preserved by zap so
-    it can be reused by a standalone intentd installation.
+    Uninstalling with --zap removes settings and the intentd daemon
+    data, including workspaces, notes, tasks, and agent sessions.
   EOS
 end

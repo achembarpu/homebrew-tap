@@ -26,10 +26,17 @@ cask "tqbf-mdv" do
         args: ["--force", "--deep", "--sign", "-", "{{appdir}}/mdv.app"]
   end
 
+  uninstall quit:   "com.mdv.app",
+            signal: ["TERM", "com.mdv.app"]
+
   zap trash: [
     "~/Library/Application Support/mdv",
     "~/Library/Caches/com.mdv.app",
+    "~/Library/HTTPStorages/com.mdv.app",
+    "~/Library/HTTPStorages/com.mdv.app.binarycookies",
+    "~/Library/Logs/com.mdv.app",
     "~/Library/Preferences/com.mdv.app.plist",
     "~/Library/Saved Application State/com.mdv.app.savedState",
+    "~/Library/WebKit/com.mdv.app",
   ]
 end

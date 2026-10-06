@@ -24,10 +24,22 @@ cask "superset" do
 
   app "Superset.app"
 
+  uninstall quit:   "com.superset.desktop",
+            signal: ["TERM", "com.superset.desktop"]
+
   zap trash: [
+    "~/.superset",
     "~/Library/Application Support/com.superset.desktop",
+    "~/Library/Application Support/Superset",
+    "~/Library/Caches/@supersetdesktop-updater",
     "~/Library/Caches/com.superset.desktop",
+    "~/Library/Caches/com.superset.desktop.ShipIt",
+    "~/Library/HTTPStorages/com.superset.desktop",
+    "~/Library/HTTPStorages/com.superset.desktop.binarycookies",
+    "~/Library/Logs/com.superset.desktop",
+    "~/Library/Logs/Superset",
     "~/Library/Preferences/com.superset.desktop.plist",
     "~/Library/Saved Application State/com.superset.desktop.savedState",
+    "~/Library/WebKit/com.superset.desktop",
   ]
 end

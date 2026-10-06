@@ -23,9 +23,19 @@ cask "junie" do
   app "Applications/junie.app"
   binary "#{appdir}/junie.app/Contents/MacOS/junie"
 
+  uninstall quit:   "com.intellij.ml.llm.matterhorn.ej.app.cli.standalone",
+            signal: ["TERM", "com.intellij.ml.llm.matterhorn.ej.app.cli.standalone"]
+
   zap trash: [
     "~/.junie",
     "~/.local/share/junie",
+    "~/Library/Caches/com.intellij.ml.llm.matterhorn.ej.app.cli.standalone",
+    "~/Library/HTTPStorages/com.intellij.ml.llm.matterhorn.ej.app.cli.standalone",
+    "~/Library/HTTPStorages/com.intellij.ml.llm.matterhorn.ej.app.cli.standalone.binarycookies",
+    "~/Library/Logs/com.intellij.ml.llm.matterhorn.ej.app.cli.standalone",
+    "~/Library/Preferences/com.intellij.ml.llm.matterhorn.ej.app.cli.standalone.plist",
+    "~/Library/Saved Application State/com.intellij.ml.llm.matterhorn.ej.app.cli.standalone.savedState",
+    "~/Library/WebKit/com.intellij.ml.llm.matterhorn.ej.app.cli.standalone",
   ]
 
   caveats <<~EOS
