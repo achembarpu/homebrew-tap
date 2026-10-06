@@ -30,6 +30,12 @@ brew uninstall --cask --zap achembarpu/tap/<cask>  # casks, including app data
 brew uninstall achembarpu/tap/<formula>             # formulae
 ```
 
+`--zap` opts into removing local app state, including sessions, daemon data,
+models, caches, preferences, and app-owned credentials. Shared resources used
+by the app are included, such as Dictate Anywhere's FluidAudio models. Ordinary
+cask uninstall keeps this data. See [the cask cleanup audit](docs/cask-zap-audit.md)
+for the storage locations checked for each app.
+
 Formulae do not support cask-style `zap` cleanup. Remove formula-specific
 user data manually using the command in the formula's caveats.
 
@@ -39,16 +45,16 @@ user data manually using the command in the formula's caveats.
 | --- | --- | --- |
 | `agent-orchestrator` | Desktop workspace for orchestrating coding agents (Apple Silicon & Intel, macOS 11+) | Developer ID signed, but the release ZIP contains AppleDouble metadata that breaks the signature seal; the cask clears quarantine and re-signs locally. Application, daemon, session, and telemetry data live under `~/.ao` and are removed by `zap`. |
 | `clearly` | Native Markdown editor with live preview (universal, macOS 15+) | Developer ID signed and notarized; uses the Sparkle appcast for `livecheck` and supports automatic updates. Scratchpads and preferences are removed by `zap`. |
-| `intent` | Desktop workspace for coordinating AI coding agents (Apple Silicon & Intel, macOS 13+) | Developer ID signed and notarized; auto-updates from GitHub Releases. `zap` removes app settings and preserves workspace, note, and agent data owned by the shared `intentd` daemon. |
+| `intent` | Desktop workspace for coordinating AI coding agents (Apple Silicon & Intel, macOS 13+) | Developer ID signed and notarized; auto-updates from GitHub Releases. `zap` removes app settings and workspace, note, task, and agent data stored by `intentd`. |
 | `junie` | JetBrains Junie AI coding agent CLI (Apple Silicon & Intel) | Developer ID signed and notarized; no `postflight` needed. Installs `junie.app` and links the CLI onto PATH. Updates via `brew upgrade`, not the binary's built-in self-updater. |
 | `kero` | Keyboard-first terminal workspace with projects, sessions, and git (macOS 15.6+) | Developer ID signed and notarized; uses Sparkle for in-app updates. Kero application data is removed by `zap`. |
-| `mowglii-mdv` | Native Markdown viewer with Quick Look and a command-line tool (universal, macOS 13+) | Developer ID signed and notarized; uses Mowglii's pinned S3 release artifact and Sparkle appcast for `livecheck` and in-app updates. The optional command-line tool is installed from the app menu. |
+| `mowglii-mdv` | Native Markdown viewer with Quick Look and a command-line tool (universal, macOS 13+) | Developer ID signed and notarized; uses Mowglii's pinned S3 release artifact and Sparkle appcast for `livecheck` and in-app updates. The optional command-line tool is installed from the app menu; `zap` removes its app-owned link. |
 | `tqbf-mdv` | Native Markdown viewer with history, bookmarks, and a TOC sidebar (Apple Silicon, macOS 13+) | Developer-signed, but the release zip's AppleDouble junk files break the signature seal; the cask clears quarantine and re-signs in `postflight`. History lives in a SQLite DB that `zap` removes. |
-| `localvoxtral` | Realtime, fully local dictation menu-bar app (Apple Silicon, macOS 15+) | Releases are ad-hoc signed, not notarized; the cask clears quarantine and re-signs in `postflight`. |
-| `mac-dictate-anywhere` | On-device voice dictation for any macOS app (universal, macOS 14+) | Developer ID signed and notarized; uses its Sparkle appcast for `livecheck` and in-app updates. Requires Microphone and Accessibility permissions. Shared FluidAudio speech models are not removed by `zap`. |
+| `localvoxtral` | Realtime, fully local dictation menu-bar app (Apple Silicon, macOS 15+) | Releases are ad-hoc signed, not notarized; the cask clears quarantine and re-signs in `postflight`. `zap` removes app data, catalog model cache entries, the login agent, and app-owned Keychain entries. |
+| `mac-dictate-anywhere` | On-device voice dictation for any macOS app (universal, macOS 14+) | Developer ID signed and notarized; uses its Sparkle appcast for `livecheck` and in-app updates. Requires Microphone and Accessibility permissions. `zap` removes downloaded speech models, including the shared FluidAudio directory, recovery recordings, and app-owned API keys. |
 | `optcgsim` | Unofficial practice tool for the One Piece Card Game (universal Mac build) | Ad-hoc signed, not notarized; the cask clears quarantine and re-signs in `postflight`. The in-app auto-patcher handles offline minor versions only; online-launchable versions require a cask update. |
-| `podium` | Multi-agent orchestrator for coding agents (Apple Silicon & Intel, macOS 11+) | Developer ID signed and notarized; uses its signed in-app updater. Requires agent CLIs to be installed and authenticated separately. Podium application data is removed by `zap`. |
-| `superset` | Agentic IDE for orchestrating coding agents (Apple Silicon & Intel, macOS 12+) | Developer ID signed and notarized; uses its in-app updater and architecture-specific GitHub release archives. Superset application data is removed by `zap`. |
+| `podium` | Multi-agent orchestrator for coding agents (Apple Silicon & Intel, macOS 11+) | Developer ID signed and notarized; uses its signed in-app updater. Requires agent CLIs to be installed and authenticated separately. Podium application data, including `~/.podium` daemon state, is removed by `zap`. |
+| `superset` | Agentic IDE for orchestrating coding agents (Apple Silicon & Intel, macOS 12+) | Developer ID signed and notarized; uses its in-app updater and architecture-specific GitHub release archives. Superset application data, including `~/.superset` and its Electron profile, is removed by `zap`. |
 | `tuicommander` | AI-native IDE for orchestrating coding agents (Apple Silicon, macOS 10.13+) | Developer ID signed and notarized; checks for updates on startup. The current macOS release is Apple Silicon only. Application data is removed by `zap`. |
 | `waku` | Native app for local coding agents (Apple Silicon, macOS 13+) | Developer ID signed and notarized; uses Sparkle for in-app updates. Projects, sessions, and transcripts are stored locally and removed by `zap`. |
 | `writer-computer` | Native Markdown writing environment (Apple Silicon, macOS 10.15+) | Developer ID signed and notarized; uses its in-app updater and the pinned GitHub DMG. App data is removed by `zap`. |
