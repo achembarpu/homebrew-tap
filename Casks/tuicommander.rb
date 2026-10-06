@@ -18,10 +18,38 @@ cask "tuicommander" do
 
   app "TUICommander.app"
 
-  zap trash: [
-    "~/Library/Application Support/com.tuic.commander",
-    "~/Library/Caches/com.tuic.commander",
-    "~/Library/Preferences/com.tuic.commander.plist",
-    "~/Library/Saved Application State/com.tuic.commander.savedState",
-  ]
+  uninstall quit:   "com.tuic.commander",
+            signal: ["TERM", "com.tuic.commander"]
+
+  zap script: {
+        executable: "/bin/sh",
+        args:       ["-c", <<~SH],
+          for service in tuicommander tuicommander-ai-chat tuicommander-llm-api tuicommander-github; do
+            while :; do
+              output=$(/usr/bin/security delete-generic-password -s "$service" 2>&1)
+              status=$?
+              case "$status" in
+                0) ;;
+                44) break ;; # The item is already absent.
+                *) printf '%s\n' "$output" >&2; exit "$status" ;;
+              esac
+            done
+          done
+        SH
+        sudo:       false,
+      },
+      trash:  [
+        "/usr/local/bin/tuic",
+        "~/.tuicommander",
+        "~/Library/Application Support/com.tuic.commander",
+        "~/Library/Application Support/tui-commander",
+        "~/Library/Application Support/tuicommander",
+        "~/Library/Caches/com.tuic.commander",
+        "~/Library/HTTPStorages/com.tuic.commander",
+        "~/Library/HTTPStorages/com.tuic.commander.binarycookies",
+        "~/Library/Logs/com.tuic.commander",
+        "~/Library/Preferences/com.tuic.commander.plist",
+        "~/Library/Saved Application State/com.tuic.commander.savedState",
+        "~/Library/WebKit/com.tuic.commander",
+      ]
 end

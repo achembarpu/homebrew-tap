@@ -28,10 +28,50 @@ cask "localvoxtral" do
         args: ["--force", "--deep", "--sign", "-", "{{appdir}}/localvoxtral.app"]
   end
 
-  zap trash: [
-    "~/Library/Application Support/localvoxtral",
-    "~/Library/Preferences/com.localvoxtral.app.plist",
-  ]
+  uninstall launchctl: "com.localvoxtral.login",
+            quit:      "com.localvoxtral.app",
+            signal:    ["TERM", "com.localvoxtral.app"]
+
+  zap launchctl: "com.localvoxtral.login",
+      script:    {
+        executable: "/bin/sh",
+        args:       ["-c", <<~SH],
+          for service in com.localvoxtral.api-keys com.localvoxtral.app.cmux-socket; do
+            while :; do
+              output=$(/usr/bin/security delete-generic-password -s "$service" 2>&1)
+              status=$?
+              case "$status" in
+                0) ;;
+                44) break ;; # The item is already absent.
+                *) printf '%s\n' "$output" >&2; exit "$status" ;;
+              esac
+            done
+          done
+        SH
+        sudo:       false,
+      },
+      trash:     [
+        "~/.cache/huggingface/hub/.locks/models--mlx-community--nemotron-3.5-asr-streaming-0.6b-8bit",
+        "~/.cache/huggingface/hub/.locks/models--mlx-community--Qwen3.5-0.8B-8bit",
+        "~/.cache/huggingface/hub/.locks/models--mlx-community--Qwen3.5-4B-OptiQ-4bit",
+        "~/.cache/huggingface/hub/.locks/models--mlx-community--Qwen3.5-9B-OptiQ-4bit",
+        "~/.cache/huggingface/hub/.locks/models--T0mSIlver--Voxtral-Mini-4B-Realtime-2602-4bit-qhead",
+        "~/.cache/huggingface/hub/models--mlx-community--nemotron-3.5-asr-streaming-0.6b-8bit",
+        "~/.cache/huggingface/hub/models--mlx-community--Qwen3.5-0.8B-8bit",
+        "~/.cache/huggingface/hub/models--mlx-community--Qwen3.5-4B-OptiQ-4bit",
+        "~/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-OptiQ-4bit",
+        "~/.cache/huggingface/hub/models--T0mSIlver--Voxtral-Mini-4B-Realtime-2602-4bit-qhead",
+        "~/Library/Application Support/localvoxtral",
+        "~/Library/Caches/com.localvoxtral.app",
+        "~/Library/Containers/com.localvoxtral.app.widgets",
+        "~/Library/HTTPStorages/com.localvoxtral.app",
+        "~/Library/HTTPStorages/com.localvoxtral.app.binarycookies",
+        "~/Library/LaunchAgents/com.localvoxtral.login.plist",
+        "~/Library/Logs/com.localvoxtral.app",
+        "~/Library/Preferences/com.localvoxtral.app.plist",
+        "~/Library/Saved Application State/com.localvoxtral.app.savedState",
+        "~/Library/WebKit/com.localvoxtral.app",
+      ]
 
   caveats <<~EOS
     macOS may silently drop the Accessibility grant after the app bundle is
