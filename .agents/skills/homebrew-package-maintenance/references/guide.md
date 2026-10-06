@@ -46,8 +46,9 @@
 
 1. Match the stanza order and style of neighboring files.
 2. Add `livecheck` for a release source that can be checked automatically.
-3. Add `zap trash:` for package-owned user data. Leave shared model caches or
-   data outside the package's ownership boundary alone.
+3. For casks, follow [the Zap contract](../../../../AGENTS.md#zap-contract),
+   including shared models and app-owned credentials. Update the zap audit
+   and storage/script fixtures required by that contract.
 4. Add caveats for required permissions, first-run downloads, update behavior,
    or other install facts users must know.
 5. Add or update the matching README table row. Do not document unverified facts.
@@ -61,6 +62,10 @@ brew style Casks/<name>.rb Formula/<name>.rb
 ruby -c Casks/<name>.rb
 git diff --check
 ```
+
+For casks, also run `brew ruby scripts/test-cask-zap.rb` and require a `PASS`
+result covering every cask. Use temporary fixtures; never test cleanup against
+real user data.
 
 Run the tap-qualified audit after the tap is available locally:
 

@@ -25,13 +25,48 @@ binaries.
   bundled JRE dylibs and ad-hoc re-signed them, so the launcher refused to
   load them). `codesign --verify --deep --strict` on the installed app is
   the gate.
-- Add a `zap trash:` list for any app that stores data, and `caveats` for
-  permission gotchas (e.g. a silently-dropped Accessibility grant after
-  updates).
+- Every new or revised cask MUST satisfy the [Zap contract](#zap-contract).
+  Add `caveats` for permission gotchas, including Accessibility grants lost
+  after updates; caveats never replace implemented cleanup.
 - `brew audit --new` admission rules (repo notability, notarization) do not apply
   to a personal tap. Do not add `--new` checks. There is no lint CI job;
   `autobump.yml` validates its own changes via `brew style` and `brew audit`,
   and manual bumps are verified locally before committing.
+
+## Zap contract
+
+`--zap` is the user's explicit opt-in to removing local app data. A successful
+zap must remove all known cleanup targets; warning about retained data is not
+an implementation. Keep data removal in `zap`, so ordinary uninstall preserves it.
+
+- Inspect the pinned upstream source or artifact for bundle identifiers,
+  storage paths, downloaded resources, helpers, and credential service names.
+  Cover current defaults and known legacy locations. Generator output is a draft;
+  guessed bundle paths alone do not establish complete cleanup.
+- Include profiles, settings, sessions, app-managed workspaces, history, logs,
+  caches, preferences, HTTP storage and binary cookies, WebKit data, saved state,
+  updater downloads, models, and app-owned credentials wherever they exist.
+- Include known shared resources that the app uses or downloads. Scope model
+  cleanup to the identified repositories and their lock directories, or the
+  identified SDK model directories. Do not omit them just because they are
+  shared, or delete an entire common cache containing unrelated resources.
+- Quit the app using its verified bundle identifier, with a `TERM` fallback.
+  Unload app-owned launch agents/services before removing their files. Include
+  installed helpers and remove CLI links only when their targets belong to the
+  app; preserve foreign links and unrelated commands.
+- Prefer `zap trash:` for paths. Use scripts only when ownership checks or
+  credential cleanup require them. Delete all matching app-owned local Keychain
+  entries using service names verified upstream. Only an absent item is a
+  successful no-op; propagate other errors instead of swallowing them.
+- Preserve unrelated documents, projects, and resources. Custom data locations
+  and remote/iCloud credentials require verified ownership and an explicit
+  cleanup rule. Document macOS permission or entitlement limits honestly;
+  denied access is not evidence that data is absent or cleanup succeeded.
+- Update [the zap audit](docs/cask-zap-audit.md) with source evidence and cleanup
+  scope. Extend [the fixture suite](scripts/test-cask-zap.rb) for every added
+  cask and changed storage or script behavior. Prove that app data disappears,
+  unrelated data survives, ordinary uninstall preserves data, and cleanup
+  errors propagate. Verification must use temporary fixtures and fake credentials.
 
 ## Workflow
 
@@ -86,6 +121,17 @@ committing.
 - If upstream ships separate arm64/amd64 macOS assets, use the `arch` stanza
   with per-arch `sha256` keys instead of pinning `depends_on arch: :arm64`.
 - Keep the README's cask and formula tables in sync when adding a cask or formula.
+
+## Verification
+
+For cask additions or changes, run `brew ruby scripts/test-cask-zap.rb`; require
+exit status 0 and the `PASS` result covering every cask. Run `brew style` on
+the edited Ruby files. Use the applicable tap-qualified audit:
+`brew audit --cask achembarpu/tap/<name>` or
+`brew audit --formula achembarpu/tap/<name>`. Ensure the audit reads the edited
+package, not a stale tapped copy. Run
+`git diff --check` before committing. Do not use `--new`, exercise zap against
+real user data as a test, or claim unavailable checks passed.
 
 ## Scope
 
