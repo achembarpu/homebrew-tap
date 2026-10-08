@@ -31,7 +31,14 @@ storage = {
   "mac-dictate-anywhere" => ["~/Library/Application Support/Dictate Anywhere/Cancelled Dictations/audio.wav",
                              "~/Library/Application Support/FluidAudio/Models/parakeet/weights"],
   "mowglii-mdv"          => ["~/Library/Preferences/com.mowglii.MDV.plist"],
-  "optcgsim"             => ["~/Library/Application Support/Batsu/OPTCGSim/decks.json"],
+  "optcgsim"             => ["~/Library/Application Support/Batsu/OPTCGSim/decks.json",
+                             "~/Library/Application Support/com.Batsu.OPTCGSim/deck.txt",
+                             "~/Library/Application Support/Godot/app_userdata/OPBounty/uinf.tres",
+                             "~/Library/Application Support/Godot/app_userdata/OPBounty/Decks/deck.txt",
+                             "~/Library/Application Support/Godot/app_userdata/OPBounty/my_matches",
+                             "~/Library/Application Support/Godot/app_userdata/OPBounty/imgs/card.jpg",
+                             "~/Library/Application Support/Godot/app_userdata/OPBounty/logs/godot.log",
+                             "~/Library/Application Support/Godot/app_userdata/OPBounty/OPBounty.pck"],
   "podium"               => ["~/.podium/config.json", "~/.podium/logs/desktop-native.ndjson"],
   "superset"             => ["~/.superset/sessions/session.json",
                              "~/Library/Application Support/Superset/Preferences",
@@ -58,18 +65,25 @@ Dir.mktmpdir("cask-zap-test-") do |temporary|
       uninstall = cask.artifacts.grep(Cask::Artifact::Uninstall).fetch(0)
       check.call(!uninstall.directives.key?(:trash) && !uninstall.directives.key?(:delete) &&
             !uninstall.directives.key?(:script), "#{cask.token}: data cleanup must require --zap")
-      bundle = uninstall.directives.fetch(:quit)
-      check.call(uninstall.directives.fetch(:signal) == [["TERM", bundle]],
+      bundles = Array(uninstall.directives.fetch(:quit))
+      check.call(uninstall.directives.fetch(:signal) == bundles.map { |bundle| ["TERM", bundle] },
                  "#{cask.token}: shutdown fallback missing")
+      if cask.token == "optcgsim"
+        check.call(bundles == ["com.Batsu.OPTCGSim", "com.smallindiedev.opbounty"],
+                   "optcgsim: bundled OPBounty helper shutdown missing")
+      end
       targets = zap.directives.fetch(:trash)
       check.call(targets.uniq == targets, "#{cask.token}: duplicate cleanup paths")
 
-      fixture_paths = storage.fetch(cask.token) + ["~/Library/Caches/#{bundle}/cache.bin",
-                                                   "~/Library/HTTPStorages/#{bundle}.binarycookies",
-                                                   "~/Library/WebKit/#{bundle}/website.db"]
+      fixture_paths = storage.fetch(cask.token) + bundles.flat_map do |bundle|
+        ["~/Library/Caches/#{bundle}/cache.bin",
+         "~/Library/HTTPStorages/#{bundle}.binarycookies",
+         "~/Library/WebKit/#{bundle}/website.db"]
+      end
       fixtures = fixture_paths.map { |path| path.sub(/^~/, fixture_home) }
       sentinels = ["#{fixture_home}/Documents/keep.md",
-                   "#{fixture_home}/Library/Caches/#{bundle}.other/keep.bin",
+                   "#{fixture_home}/Library/Caches/#{bundles.first}.other/keep.bin",
+                   "#{fixture_home}/Library/Application Support/Godot/app_userdata/OtherGame/save.json",
                    "#{fixture_home}/.cache/huggingface/hub/models--unrelated--model/weights"]
       (fixtures + sentinels).each do |path|
         FileUtils.mkdir_p(File.dirname(path))

@@ -1,6 +1,6 @@
 cask "optcgsim" do
-  version "1.43a"
-  sha256 "058855b137b5a214df20b2b2a7d610bc672f9993ea7d861dfe008a2c68a186a4"
+  version "1.44a"
+  sha256 "83ed1e6925d78bede68c2c1d3c5692781e07b58d038dd3ac806f759d31bd0fd2"
 
   url "https://www.dropbox.com/scl/fi/te0z476tf5wamm827fnm8/1_#{version.tr(".", "_")}_Mac.zip?rlkey=laxvcq3xzof78lzijeprxh12y&st=95sfxiex&dl=1",
       only_path: "#{version}_Mac"
@@ -28,25 +28,37 @@ cask "optcgsim" do
         args: ["--force", "--deep", "--sign", "-", "{{appdir}}/OPTCGSim.app"]
   end
 
-  uninstall quit:   "com.Batsu.OPTCGSim",
-            signal: ["TERM", "com.Batsu.OPTCGSim"]
+  uninstall quit:   ["com.Batsu.OPTCGSim", "com.smallindiedev.opbounty"],
+            signal: [
+              ["TERM", "com.Batsu.OPTCGSim"],
+              ["TERM", "com.smallindiedev.opbounty"],
+            ]
 
   zap trash: [
     "~/Library/Application Support/Batsu/OPTCGSim",
+    "~/Library/Application Support/com.Batsu.OPTCGSim",
+    "~/Library/Application Support/Godot/app_userdata/OPBounty",
     "~/Library/Caches/Batsu/OPTCGSim",
     "~/Library/Caches/com.Batsu.OPTCGSim",
+    "~/Library/Caches/com.smallindiedev.opbounty",
     "~/Library/HTTPStorages/com.Batsu.OPTCGSim",
     "~/Library/HTTPStorages/com.Batsu.OPTCGSim.binarycookies",
+    "~/Library/HTTPStorages/com.smallindiedev.opbounty",
+    "~/Library/HTTPStorages/com.smallindiedev.opbounty.binarycookies",
     "~/Library/Logs/Batsu/OPTCGSim",
     "~/Library/Logs/com.Batsu.OPTCGSim",
+    "~/Library/Logs/com.smallindiedev.opbounty",
     "~/Library/Preferences/com.Batsu.OPTCGSim.plist",
+    "~/Library/Preferences/com.smallindiedev.opbounty.plist",
     "~/Library/Saved Application State/com.Batsu.OPTCGSim.savedState",
+    "~/Library/Saved Application State/com.smallindiedev.opbounty.savedState",
     "~/Library/Unity/com.Batsu.OPTCGSim",
     "~/Library/WebKit/com.Batsu.OPTCGSim",
+    "~/Library/WebKit/com.smallindiedev.opbounty",
   ]
 
   caveats <<~EOS
-    The cask pins the site's current Mac build (1.43a), served from the site's
+    The cask pins the site's current Mac build (#{version}), served from the site's
     Dropbox link, which is still named 1_30d_Mac.zip. Since v1.40a the app
     self-patches offline minor versions in-app, but online-launchable versions
     require a cask update and cannot be upgraded by the auto-patcher.
