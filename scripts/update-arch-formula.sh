@@ -28,18 +28,54 @@ esac
 
 FORMULA_FILE="$ROOT_DIR/Formula/$FORMULA.rb"
 [[ -f "$FORMULA_FILE" ]] || { printf 'Error: formula not found: %s\n' "$FORMULA_FILE" >&2; exit 1; }
+CURRENT_VERSION="$(python3 - "$FORMULA_FILE" <<'PY'
+import re, sys
+text = open(sys.argv[1]).read()
+m = re.search(r'/releases/download/v(\d+(?:\.\d+)+)/', text)
+print(m.group(1) if m else "")
+PY
+)"
+[[ -n "$CURRENT_VERSION" ]] || { printf 'Error: could not read current version from release URL\n' >&2; exit 1; }
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 TOKEN="${GH_TOKEN:-${GITHUB_TOKEN:-}}"
 API_ARGS=(-fsSL --retry 3 --connect-timeout 15 -H 'Accept: application/vnd.github+json')
 [[ -n "$TOKEN" ]] && API_ARGS+=(-H "Authorization: Bearer $TOKEN")
-curl "${API_ARGS[@]}" "https://api.github.com/repos/$REPO/releases?per_page=100" -o "$TMP_DIR/releases.json"
 
-RELEASE_META="$(python3 - "$TMP_DIR/releases.json" "$FORMULA" <<'PY'
-import json, re, sys
-releases = json.load(open(sys.argv[1]))
-formula = sys.argv[2]
+# Qwen's release list can omit current CLI releases while /releases/latest
+# points at an SDK release. Git refs include every tag, without pagination.
+git ls-remote --tags --refs "https://github.com/$REPO.git" 'v*' > "$TMP_DIR/tags.txt"
+python3 - "$TMP_DIR/tags.txt" "$CURRENT_VERSION" > "$TMP_DIR/versions.txt" <<'PY'
+import re, sys
+
+def version_key(version):
+    return tuple(map(int, version.split(".")))
+
+current = version_key(sys.argv[2])
+versions = set()
+for line in open(sys.argv[1]):
+    match = re.search(r"\srefs/tags/v(\d+(?:\.\d+)+)$", line.strip())
+    if match and version_key(match.group(1)) > current:
+        versions.add(match.group(1))
+for version in sorted(versions, key=version_key, reverse=True):
+    print(version)
+PY
+
+RELEASE_META=""
+while IFS= read -r VERSION; do
+  # A tag alone does not establish a published, stable release with assets.
+  STATUS="$(curl "${API_ARGS[@]}" "https://api.github.com/repos/$REPO/releases/tags/v$VERSION" -o "$TMP_DIR/release.json" -w '%{http_code}')" || {
+    [[ "$STATUS" == "404" ]] && continue
+    printf 'Error: could not fetch release v%s (HTTP %s)\n' "$VERSION" "$STATUS" >&2
+    exit 1
+  }
+  RELEASE_META="$(python3 - "$TMP_DIR/release.json" "$FORMULA" "$VERSION" <<'PY'
+import json, sys
+release = json.load(open(sys.argv[1]))
+formula, version = sys.argv[2:]
+if release.get("draft") or release.get("prerelease") or release.get("tag_name") != f"v{version}":
+    sys.exit(0)
 
 if formula == "maki":
     asset_names = lambda version: (
@@ -52,40 +88,19 @@ else:
         "qwen-code-darwin-x64.tar.gz",
     )
 
-# The repository publishes SDK, desktop, and CLI releases.  Do not use
-# /releases/latest: GitHub considers the most recently published release
-# "latest", even when it is for a different product.
-for release in releases:
-    if release.get("draft") or release.get("prerelease"):
-        continue
-    tag = release.get("tag_name", "")
-    match = re.fullmatch(r"v(\d+(?:\.\d+)+)", tag)
-    if not match:
-        continue
-    version = match.group(1)
-    names = {a["name"]: a["browser_download_url"] for a in release.get("assets", [])}
-    arm, intel = asset_names(version)
-    if arm in names and intel in names:
-        print(version, names[arm], names[intel])
-        break
-else:
-    raise SystemExit("could not find a stable release with both macOS architecture assets")
+names = {a["name"]: a["browser_download_url"] for a in release.get("assets", [])}
+arm, intel = asset_names(version)
+if arm in names and intel in names:
+    print(version, names[arm], names[intel])
 PY
 )"
-read -r TARGET_VERSION ARM_URL INTEL_URL <<< "$RELEASE_META"
-
-CURRENT_VERSION="$(python3 - "$FORMULA_FILE" <<'PY'
-import re, sys
-text = open(sys.argv[1]).read()
-m = re.search(r'/releases/download/v([^/"?]+)/', text)
-print(m.group(1) if m else "")
-PY
-)"
-[[ -n "$CURRENT_VERSION" ]] || { printf 'Error: could not read current version from release URL\n' >&2; exit 1; }
-if [[ "$TARGET_VERSION" == "$CURRENT_VERSION" ]]; then
+  [[ -n "$RELEASE_META" ]] && break
+done < "$TMP_DIR/versions.txt"
+if [[ -z "$RELEASE_META" ]]; then
   printf '%s already up to date: %s\n' "$FORMULA" "$CURRENT_VERSION"
   exit 0
 fi
+read -r TARGET_VERSION ARM_URL INTEL_URL <<< "$RELEASE_META"
 
 printf 'Plan:\n  formula: %s\n  version: %s -> %s\n  arm64:   %s\n  x86_64:  %s\n' "$FORMULA" "$CURRENT_VERSION" "$TARGET_VERSION" "$ARM_URL" "$INTEL_URL"
 [[ "$DRY_RUN" == 1 ]] && exit 0

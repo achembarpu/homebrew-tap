@@ -97,7 +97,10 @@ artifacts require the manual workflow described by the skill.
 This rewrites `version`, `sha256`, and `url` in place for casks, keeping your `desc`,
 `zap`, and `caveats`. For formulae, use the dedicated architecture updater
 for `qwen-code` and `maki`; ordinary versioned release formulas can use
-`brew bump`. Then run `brew style`, `brew audit`, commit, and push — clients
+`brew bump`. The architecture updater checks Git tags in numeric version order,
+verifies stable releases with both macOS assets, and only upgrades the current pin.
+Run its offline fixtures with `python3 scripts/test-update-arch-formula.py`.
+Then run `brew style`, `brew audit`, commit, and push — clients
 run `brew update && brew upgrade`.
 
 ### Updating `optcgsim`

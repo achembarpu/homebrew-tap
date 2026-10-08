@@ -11,9 +11,9 @@ class QwenCode < Formula
   license "Apache-2.0"
 
   livecheck do
-    url "https://github.com/QwenLM/qwen-code/releases"
-    regex(%r{/QwenLM/qwen-code/releases/tag/v(\d+(?:\.\d+)+)}i)
-    strategy :page_match
+    url "https://github.com/QwenLM/qwen-code.git"
+    regex(/^v(\d+(?:\.\d+)+)$/i)
+    strategy :git
   end
 
   depends_on :macos

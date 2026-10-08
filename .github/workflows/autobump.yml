@@ -252,6 +252,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
         run: |
+          python3 scripts/test-update-arch-formula.py
           ./scripts/update-arch-formula.sh "${{ matrix.formula }}" --dry-run 2>&1 | tee /tmp/arch-plan.txt
           if grep -q 'already up to date' /tmp/arch-plan.txt; then
             echo 'needed=false' >> "$GITHUB_OUTPUT"
