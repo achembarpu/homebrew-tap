@@ -1,6 +1,6 @@
 cask "mac-dictate-anywhere" do
-  version "2.12.7,49"
-  sha256 "5b29a5114bca36378678faa696e3226c8533db7bce5276fe0ed8016994cef7da"
+  version "2.12.10,52"
+  sha256 "809c3b7a7da604b7f04bc71c17b74d9ff58b4cb66070ad79ac647568a832423f"
 
   url "https://github.com/hoomanaskari/mac-dictate-anywhere/releases/download/v#{version.csv.first}/DictateAnywhere-#{version.csv.first}.zip"
   name "Dictate Anywhere"
