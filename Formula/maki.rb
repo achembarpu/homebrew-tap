@@ -2,11 +2,11 @@ class Maki < Formula
   desc "Efficient AI coding agent with Lua plugins"
   homepage "https://maki.sh"
   if Hardware::CPU.arm?
-    url "https://github.com/tontinton/maki/releases/download/v0.6.0/maki-v0.6.0-aarch64-apple-darwin.tar.gz"
-    sha256 "654f5f05e71d28fa50e3af287117a5c2ca55f8b84cde972c7aa1cb732817b1e4"
+    url "https://github.com/tontinton/maki/releases/download/v0.6.2/maki-v0.6.2-aarch64-apple-darwin.tar.gz"
+    sha256 "58c49ef7f2af8a7b77d4d27f8a42da78c7dc97ebf8e02082d3339b51fc8192b5"
   else
-    url "https://github.com/tontinton/maki/releases/download/v0.6.0/maki-v0.6.0-x86_64-apple-darwin.tar.gz"
-    sha256 "2a683575060db9dc2cd68c243184f6732943ca1bd8e00279f8756e2f5dfbc23f"
+    url "https://github.com/tontinton/maki/releases/download/v0.6.2/maki-v0.6.2-x86_64-apple-darwin.tar.gz"
+    sha256 "6e7b6be988fa1d1750e24ed3528fe35754254764808a63f1146f9f71f662ea77"
   end
   license "MIT"
 
