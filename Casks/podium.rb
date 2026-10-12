@@ -1,9 +1,9 @@
 cask "podium" do
   arch arm: "aarch64", intel: "x64"
 
-  version "0.1.0"
-  sha256 arm:   "ce89e7346279dc908851f8fded5466de8ebd08594bc6070c80e02dfb9e27e13f",
-         intel: "cd74bbe38bf939f1a2de18ffb1f37d2f0ede1a1175bb11e2a961874247a95d4e"
+  version "0.2.0"
+  sha256 arm:   "4bfc21fdbac7ebb2fb589a35b858fc102bbb1b62f2a7d63d12ba43c872c5cdd5",
+         intel: "695681d08af58eef6ee1f724ac3b3c4be8c84af9539e5442efb350614c4f011c"
 
   url "https://github.com/madeinorbit/podium/releases/download/v#{version}/Podium_#{version}_#{arch}.dmg"
   name "Podium"
