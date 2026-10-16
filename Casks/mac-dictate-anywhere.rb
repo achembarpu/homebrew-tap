@@ -39,7 +39,17 @@ cask "mac-dictate-anywhere" do
       },
       trash:  [
         "~/Library/Application Support/Dictate Anywhere",
-        "~/Library/Application Support/FluidAudio",
+        "~/Library/Application Support/FluidAudio/Models/nemotron-multilingual/multilingual/1120ms",
+        "~/Library/Application Support/FluidAudio/Models/nemotron-streaming/1120ms",
+        "~/Library/Application Support/FluidAudio/Models/nemotron-streaming/2240ms",
+        "~/Library/Application Support/FluidAudio/Models/nemotron-streaming/560ms",
+        "~/Library/Application Support/FluidAudio/Models/parakeet-ctc-110m-coreml",
+        "~/Library/Application Support/FluidAudio/Models/parakeet-eou-streaming/320ms",
+        "~/Library/Application Support/FluidAudio/Models/parakeet-tdt-0.6b-v2",
+        "~/Library/Application Support/FluidAudio/Models/parakeet-tdt-0.6b-v3",
+        "~/Library/Application Support/FluidAudio/Models/parakeet-tdt-ctc-110m",
+        "~/Library/Application Support/FluidAudio/Models/parakeet-ultra",
+        "~/Library/Application Support/FluidAudio/Models/sensevoice-small",
         "~/Library/Caches/com.pixelforty.dictate-anywhere",
         "~/Library/HTTPStorages/com.pixelforty.dictate-anywhere",
         "~/Library/HTTPStorages/com.pixelforty.dictate-anywhere.binarycookies",
@@ -54,6 +64,7 @@ cask "mac-dictate-anywhere" do
     both permissions in System Settings → Privacy & Security before dictating.
 
     Uninstalling with --zap also removes downloaded speech models, including
-    the shared FluidAudio model directory.
+    the specific shared FluidAudio models used by this app. Other FluidAudio
+    models and datasets are preserved.
   EOS
 end

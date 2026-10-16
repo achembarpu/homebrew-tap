@@ -21,7 +21,32 @@ cask "tuicommander" do
   uninstall quit:   "com.tuic.commander",
             signal: ["TERM", "com.tuic.commander"]
 
-  zap script: {
+  zap early_script: {
+        executable: "/bin/sh",
+        args:       ["-c", <<~SH],
+          link="/usr/local/bin/tuic"
+          if [ -L "$link" ]; then
+            target=$(/usr/bin/readlink "$link") || exit "$?"
+            target=$(/usr/bin/ruby -e 'puts File.expand_path(ARGV.fetch(0), File.dirname(ARGV.fetch(1)))' "$target" "$link") || exit "$?"
+            case "$target" in
+              */TUICommander.app/Contents/MacOS/tuic) /bin/rm -- "$link" ;;
+            esac
+          elif [ -f "$link" ]; then
+            [ -r "$link" ] || { printf 'Cannot read %s\n' "$link" >&2; exit 1; }
+            # Upstream copies the signed sidecar, rather than linking it.
+            # Its identifier and Developer ID team also identify older copies.
+            output=$(/usr/bin/codesign --verify --strict -R '=identifier "tuic" and anchor apple generic and certificate leaf[subject.OU] = "J728B48HPY"' "$link" 2>&1)
+            status=$?
+            case "$status" in
+              0) /bin/rm -- "$link" ;;
+              1) ;; # A foreign or unsigned command does not belong to this app.
+              *) printf '%s\n' "$output" >&2; exit "$status" ;;
+            esac
+          fi
+        SH
+        sudo:       true,
+      },
+      script:       {
         executable: "/bin/sh",
         args:       ["-c", <<~SH],
           for service in tuicommander tuicommander-ai-chat tuicommander-llm-api tuicommander-github; do
@@ -38,8 +63,7 @@ cask "tuicommander" do
         SH
         sudo:       false,
       },
-      trash:  [
-        "/usr/local/bin/tuic",
+      trash:        [
         "~/.tuicommander",
         "~/Library/Application Support/com.tuic.commander",
         "~/Library/Application Support/tui-commander",

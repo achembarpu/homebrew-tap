@@ -27,6 +27,7 @@ cask "writer-computer" do
           link="/usr/local/bin/writer"
           if [ -L "$link" ]; then
             target=$(/usr/bin/readlink "$link") || exit "$?"
+            target=$(/usr/bin/ruby -e 'puts File.expand_path(ARGV.fetch(0), File.dirname(ARGV.fetch(1)))' "$target" "$link") || exit "$?"
             case "$target" in
               */Writer.app/Contents/*) /bin/rm -- "$link" ;;
             esac

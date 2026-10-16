@@ -23,21 +23,70 @@ cask "intent" do
   uninstall quit:   "app.cloudlands.intent",
             signal: ["TERM", "app.cloudlands.intent"]
 
-  zap trash: [
-    "~/Library/Application Support/Intent",
-    "~/Library/Application Support/intent-cloudlands",
-    "~/Library/Application Support/intentd",
-    "~/Library/Caches/app.cloudlands.intent",
-    "~/Library/Caches/app.cloudlands.intent.ShipIt",
-    "~/Library/Caches/intent-updater",
-    "~/Library/HTTPStorages/app.cloudlands.intent",
-    "~/Library/HTTPStorages/app.cloudlands.intent.binarycookies",
-    "~/Library/Logs/app.cloudlands.intent",
-    "~/Library/Logs/Intent",
-    "~/Library/Preferences/app.cloudlands.intent.plist",
-    "~/Library/Saved Application State/app.cloudlands.intent.savedState",
-    "~/Library/WebKit/app.cloudlands.intent",
-  ]
+  zap script: {
+        executable: "/usr/bin/ruby",
+        args:       ["-e", <<~'RUBY'],
+          require "open3"
+          home = Dir.home
+          app_bundle = "Intent.app"
+          state_root = File.join(home, "Library/Application Support/intentd")
+          output, status = Open3.capture2e("/bin/ps", "-x", "-o", "pid=,comm=")
+          abort output unless status.success?
+          output.each_line do |line|
+            pid, executable = line.strip.split(/\s+/, 2)
+            next unless pid && pid.to_i > 1 && pid.to_i != Process.pid && executable
+            next unless executable.include?("/" + app_bundle + "/Contents/") ||
+                        executable.start_with?(state_root + "/")
+
+            begin
+              Process.kill("TERM", pid.to_i)
+            rescue Errno::ESRCH
+              next
+            end
+            50.times do
+              begin
+                Process.kill(0, pid.to_i)
+              rescue Errno::ESRCH
+                break
+              end
+              sleep 0.1
+            end
+            begin
+              Process.kill(0, pid.to_i)
+              abort "App helper #{pid} did not stop; refusing to remove its data"
+            rescue Errno::ESRCH
+              nil
+            end
+          end
+          ["intent Safe Storage"].each do |service|
+            loop do
+              output, status = Open3.capture2e("/usr/bin/security", "delete-generic-password", "-s", service)
+              break if status.exitstatus == 44
+              next if status.success?
+
+              warn output
+              exit(status.exitstatus || 1)
+            end
+          end
+        RUBY
+        sudo:       false,
+      },
+      trash:  [
+        "~/Library/Application Support/Intent",
+        "~/Library/Application Support/intent-cloudlands",
+        "~/Library/Application Support/intentd",
+        "~/Library/Caches/app.cloudlands.intent",
+        "~/Library/Caches/app.cloudlands.intent.ShipIt",
+        "~/Library/Caches/intent-updater",
+        "~/Library/HTTPStorages/app.cloudlands.intent",
+        "~/Library/HTTPStorages/app.cloudlands.intent.binarycookies",
+        "~/Library/Logs/app.cloudlands.intent",
+        "~/Library/Logs/Intent",
+        "~/Library/Preferences/app.cloudlands.intent.plist",
+        "~/Library/Preferences/ByHost/app.cloudlands.intent.ShipIt.*.plist",
+        "~/Library/Saved Application State/app.cloudlands.intent.savedState",
+        "~/Library/WebKit/app.cloudlands.intent",
+      ]
 
   caveats <<~EOS
     Intent requires a configured agent provider. It prompts to install Git and
@@ -47,6 +96,8 @@ cask "intent" do
     `brew upgrade --cask intent`.
 
     Uninstalling with --zap removes settings and the intentd daemon
-    data, including workspaces, notes, tasks, and agent sessions.
+    data, including workspaces, notes, tasks, and agent sessions. It removes the
+    local Electron encryption key. Cross-device iCloud backend and guest-session
+    records remain; use Intent's Forget action to remove those records.
   EOS
 end

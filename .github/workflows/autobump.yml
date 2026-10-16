@@ -73,7 +73,7 @@ jobs:
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
           failed_packages=()
-          for package in agent-orchestrator clearly deepseek-harness junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent qm superset tqbf-mdv tuicommander waku writer-computer zeron; do
+          for package in agent-orchestrator clearly deepseek-harness happier junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent qm superset tqbf-mdv tuicommander waku writer-computer zeron; do
             livecheck="$(brew livecheck --json "$TAP_NAME/$package")"
             latest="$(jq -r '.[0].version.latest // empty' <<<"$livecheck")"
             outdated="$(jq -r '.[0].version.outdated' <<<"$livecheck")"

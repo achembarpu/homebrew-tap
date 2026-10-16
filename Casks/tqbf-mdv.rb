@@ -17,26 +17,31 @@ cask "tqbf-mdv" do
 
   app "mdv.app"
 
-  # The release zip ships AppleDouble (._) junk files inside the bundle, which
-  # break the developer signature's seal: Gatekeeper treats the app as damaged
-  # and blocks first launch. Clear quarantine and re-sign locally.
-  postflight_steps do
-    run "/usr/bin/xattr", args: ["-cr", "{{appdir}}/mdv.app"]
-    run "/usr/bin/codesign",
-        args: ["--force", "--deep", "--sign", "-", "{{appdir}}/mdv.app"]
-  end
-
   uninstall quit:   "com.mdv.app",
             signal: ["TERM", "com.mdv.app"]
 
-  zap trash: [
-    "~/Library/Application Support/mdv",
-    "~/Library/Caches/com.mdv.app",
-    "~/Library/HTTPStorages/com.mdv.app",
-    "~/Library/HTTPStorages/com.mdv.app.binarycookies",
-    "~/Library/Logs/com.mdv.app",
-    "~/Library/Preferences/com.mdv.app.plist",
-    "~/Library/Saved Application State/com.mdv.app.savedState",
-    "~/Library/WebKit/com.mdv.app",
-  ]
+  zap script: {
+        executable: "/bin/sh",
+        args:       ["-c", <<~SH],
+          link="/usr/local/bin/mdv"
+          if [ -L "$link" ]; then
+            target=$(/usr/bin/readlink "$link") || exit "$?"
+            target=$(/usr/bin/ruby -e 'puts File.expand_path(ARGV.fetch(0), File.dirname(ARGV.fetch(1)))' "$target" "$link") || exit "$?"
+            case "$target" in
+              */mdv.app/Contents/Resources/mdv) /bin/rm -- "$link" ;;
+            esac
+          fi
+        SH
+        sudo:       true,
+      },
+      trash:  [
+        "~/Library/Application Support/mdv",
+        "~/Library/Caches/com.mdv.app",
+        "~/Library/HTTPStorages/com.mdv.app",
+        "~/Library/HTTPStorages/com.mdv.app.binarycookies",
+        "~/Library/Logs/com.mdv.app",
+        "~/Library/Preferences/com.mdv.app.plist",
+        "~/Library/Saved Application State/com.mdv.app.savedState",
+        "~/Library/WebKit/com.mdv.app",
+      ]
 end

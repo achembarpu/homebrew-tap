@@ -28,6 +28,7 @@ cask "mowglii-mdv" do
           link="$HOME/.local/bin/mdv"
           if [ -L "$link" ]; then
             target=$(/usr/bin/readlink "$link") || exit "$?"
+            target=$(/usr/bin/ruby -e 'puts File.expand_path(ARGV.fetch(0), File.dirname(ARGV.fetch(1)))' "$target" "$link") || exit "$?"
             case "$target" in
               */MDV.app/Contents/*) /bin/rm -- "$link" ;;
             esac
