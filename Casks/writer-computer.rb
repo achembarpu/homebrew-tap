@@ -1,6 +1,6 @@
 cask "writer-computer" do
-  version "0.7.3"
-  sha256 "dffaf883553db54dde42df7dcaf24ed8b10f899d41b6e97fc66012817f92038e"
+  version "0.8.0"
+  sha256 "b651ddd976417404a85afd24684078d98c6551078691cfbafd2eee3373f37300"
 
   url "https://github.com/joelbqz/writer-computer/releases/download/v#{version}/Writer_#{version}_aarch64.dmg"
   name "Writer"
