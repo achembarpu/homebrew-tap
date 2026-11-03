@@ -1,6 +1,6 @@
 cask "tuicommander" do
-  version "1.7.6"
-  sha256 "0f7b911b5ee615bdfd72bd4c943c7c167aea89dc3bf48695abb5525c631deca3"
+  version "2.0.0"
+  sha256 "8481b3b2703c3522559a1a2a596737aca7aa37d95b7bdec05ca8b13d5e1de15d"
 
   url "https://github.com/sstraus/tuicommander/releases/download/v#{version}/TUICommander_#{version}_aarch64.dmg"
   name "TUICommander"
@@ -14,7 +14,7 @@ cask "tuicommander" do
 
   auto_updates true
   depends_on arch: :arm64
-  depends_on :macos
+  depends_on macos: :monterey
 
   app "TUICommander.app"
 
