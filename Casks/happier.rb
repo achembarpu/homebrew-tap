@@ -1,9 +1,9 @@
 cask "happier" do
   arch arm: "aarch64", intel: "x86_64"
 
-  version "0.2.17"
-  sha256 arm:   "2a8611e44018f25e0c1e38e4370682d9cbbea311f5954fd784aabb73b9510d46",
-         intel: "3283fa960084af9bc2457ee9954bea486c54c649d39aa55115071ceeb0c3fa80"
+  version "0.2.21"
+  sha256 arm:   "cef316bfe2c3d5b1f72fece3ba0f4697261b5ebe52706f5be32ea0d35fab2d09",
+         intel: "18288d11f990febd4ff020708e672143dc46f71cd751d01b7ba5c4ef629be435"
 
   # Adapted from happier-dev/happier's packaging/homebrew/Casks/happier.rb.
   url "https://github.com/happier-dev/happier/releases/download/ui-desktop-v#{version}/happier-ui-desktop-darwin-#{arch}-v#{version}.dmg"
