@@ -72,6 +72,7 @@ jobs:
           HOMEBREW_GIT_COMMITTER_EMAIL: ${{ steps.git_setup.outputs.email }}
           TAP_NAME: ${{ steps.setup-homebrew.outputs.tap-name }}
         run: |
+          brew ruby "$(brew --repository "$TAP_NAME")/scripts/test-cask-macos.rb"
           failed_packages=()
           for package in agent-orchestrator clearly deepseek-harness happier junie kero localvoxtral mac-dictate-anywhere mowglii-mdv podium prime-agent qm superset tqbf-mdv tuicommander waku writer-computer zeron; do
             livecheck="$(brew livecheck --json "$TAP_NAME/$package")"

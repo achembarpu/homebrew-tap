@@ -20,7 +20,13 @@ cask "superset" do
   end
 
   auto_updates true
-  depends_on macos: :monterey
+
+  # The 2.0.5 release raised the app's minimum macOS version.
+  if Version.new(version.to_s) >= Version.new("2.0.5")
+    depends_on macos: :ventura
+  else
+    depends_on macos: :monterey
+  end
 
   app "Superset.app"
 

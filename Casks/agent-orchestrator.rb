@@ -16,7 +16,13 @@ cask "agent-orchestrator" do
   end
 
   auto_updates true
-  depends_on :macos
+
+  # The 0.14.9 release raised the app's minimum macOS version.
+  if Version.new(version.to_s) >= Version.new("0.14.9")
+    depends_on macos: :ventura
+  else
+    depends_on :macos
+  end
 
   app "Agent Orchestrator.app"
 
