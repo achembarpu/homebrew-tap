@@ -129,32 +129,10 @@ jobs:
           auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64)"
           git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic $auth"
 
-      - name: Check for optcgsim update
-        id: check
-        run: |
-          set +x
-          echo "Checking optcgsim RSS feed vs pinned version..."
-          if ./scripts/update-optcgsim.sh --dry-run 2>&1 | tee /tmp/optcgsim-plan.txt; then
-            if grep -q "already up to date" /tmp/optcgsim-plan.txt; then
-              echo "needed=false" >> "$GITHUB_OUTPUT"
-              echo "No update needed for optcgsim" >> "$GITHUB_STEP_SUMMARY"
-              cat /tmp/optcgsim-plan.txt >> "$GITHUB_STEP_SUMMARY"
-            else
-              echo "needed=true" >> "$GITHUB_OUTPUT"
-              echo "Update available for optcgsim" >> "$GITHUB_STEP_SUMMARY"
-              cat /tmp/optcgsim-plan.txt >> "$GITHUB_STEP_SUMMARY"
-            fi
-          else
-            echo "needed=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::update-optcgsim.sh --dry-run failed; see log"
-            cat /tmp/optcgsim-plan.txt
-          fi
-          cat /tmp/optcgsim-plan.txt
-
       - name: Update optcgsim cask
-        if: steps.check.outputs.needed == 'true'
         id: update
         run: |
+          python3 scripts/test-update-optcgsim.py
           set +e
           ./scripts/update-optcgsim.sh 2>&1 | tee /tmp/optcgsim-update.txt
           update_status="${PIPESTATUS[0]}"
@@ -182,11 +160,11 @@ jobs:
           fi
 
       - name: Set up git
-        if: steps.check.outputs.needed == 'true' && steps.update.outputs.changed == 'true'
+        if: steps.update.outputs.changed == 'true'
         uses: Homebrew/actions/git-user-config@f8d4222eb633e65c2a0157383cf80861fc7fae7f # 2026.09.07.1
 
       - name: Create pull request
-        if: steps.check.outputs.needed == 'true' && steps.update.outputs.changed == 'true'
+        if: steps.update.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
         run: |
@@ -210,7 +188,7 @@ jobs:
            done
           BODY="Automated bump of \`optcgsim\` to \`${{ steps.update.outputs.version }}\` via \`scripts/update-optcgsim.sh\`.
 
-          - Version from RSS feed: https://optcgsim.com/feed/
+          - Version verified against the Mac download and RSS feed: https://optcgsim.com/feed/
           - URL scraped from https://optcgsim.com/
           - Binary verified against embedded \`sim version:\` in \`Assembly-CSharp.dll\`
 

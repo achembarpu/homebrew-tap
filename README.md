@@ -110,6 +110,8 @@ run `brew update && brew upgrade`.
 GitHub release, so `add-cask.sh` can't drive it. Run
 `./scripts/update-optcgsim.sh --dry-run` first, then the script without flags
 (see `.agents/skills/update-optcgsim/SKILL.md` for the full workflow).
+The check downloads the Mac archive even when the RSS feed has not changed,
+because the archive can contain a newer build than the feed announces.
 
 ### Updating `junie-local`
 
@@ -137,8 +139,8 @@ default Actions `GITHUB_TOKEN`.
   The job de-duplicates against open PRs and runs `brew audit` and `brew style`
   inline.
 
-- `bump-optcgsim` — runs `scripts/update-optcgsim.sh` (see above) and opens a
-  PR with `peter-evans/create-pull-request` when the RSS version differs.
+- `bump-optcgsim` — inspects the current Mac archive and opens a PR when its
+  verified version is newer than the pinned cask.
 
 - `bump-junie-local` — runs `scripts/update-junie-local.sh` (see above) and
   opens a PR when the pinned SHA differs.

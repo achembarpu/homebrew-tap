@@ -6,14 +6,12 @@ set -euo pipefail
 # optcgsim has no GitHub releases, no livecheck, and no published checksums:
 # the Mac Dropbox link on https://optcgsim.com/ and a Google Drive mirror. The
 # Dropbox filename segment is VESTIGIAL (it currently says 1_30d_Mac.zip while
-# the zip holds the 1.43a build). The version authority is the site's WordPress
-# RSS feed (https://optcgsim.com/feed/), the URLs come from scraping the Mac
-# download section, and the sha256 is computed from a fresh download (~711 MiB).
-# The script aborts rather than rewrite the cask if neither download confirms
-# the feed's version or the <version>_Mac/ folder naming changed.
+# the zip holds a newer build). The site's WordPress RSS feed may lag the Mac
+# download. Inspect the archive and its embedded
+# version, compare it with the feed, and compute its sha256 from a fresh download.
 #
 #   ./scripts/update-optcgsim.sh            # full bump: download, verify, rewrite
-#   ./scripts/update-optcgsim.sh --dry-run  # plan only, no download/no write
+#   ./scripts/update-optcgsim.sh --dry-run  # inspect the download without writing
 #   ./scripts/update-optcgsim.sh --version 1.43a  # override the feed version
 #
 # The script never commits; commit the cask separately.
@@ -24,7 +22,7 @@ CASK_FILE="$CASKS_DIR/optcgsim.rb"
 
 FEED_URL="https://optcgsim.com/feed/"
 PAGE_URL="https://optcgsim.com/"
-ZIP_HINT="~711 MiB"
+ZIP_HINT="~775 MiB"
 
 # Use the tapped checkout when available, but do not assume Homebrew's
 # installation prefix. TAP_CASK may be supplied explicitly for unusual setups.
@@ -42,17 +40,14 @@ Usage: update-optcgsim.sh [options]
 
 Bump Casks/optcgsim.rb to the version announced on optcgsim.com.
 
-The version comes from the site's RSS feed (newest post title); the download
-URL is scraped from the site's Mac Dropbox link. The script downloads the zip
-(~711 MiB), computes the sha256, verifies the binary's embedded version string
-and the <version>_Mac/OPTCGSim.app zip entry, then rewrites the cask's
-version/sha256/url stanzas in place.
+The download URL is scraped from the site's Mac Dropbox link. The script
+downloads the zip, verifies its embedded version against the bundle path and
+the RSS feed, then rewrites the cask's version/sha256/url stanzas in place.
 
 Options:
-  --dry-run          Print the bump plan (old -> new version, URL, download
-                     needed?) and exit without downloading or writing.
-  --version <v>      Override the RSS-derived version (the URL is still
-                     scraped; the binary truth-check still runs).
+  --dry-run          Download and inspect the archive, without writing a cask.
+  --version <v>      Require this exact binary version instead of the RSS
+                     minimum (the URL is still scraped and verified).
   -h, --help         Show this help.
 EOF
 }
@@ -145,29 +140,6 @@ IFS=$'\t' read -r TARGET_VERSION SCRAPED_URL DRIVE_URL <<<"$meta"
 NEW_FILENAME='1_#{version.tr(".", "_")}_Mac.zip'
 NEW_URL="$(printf '%s\n' "$SCRAPED_URL" | sed "s|[^/?]*Mac\.zip|${NEW_FILENAME}|")"
 [ "$NEW_URL" != "$SCRAPED_URL" ] || die "could not rebuild the Dropbox URL (no Mac.zip filename segment): $SCRAPED_URL"
-# --- plan / early exits ------------------------------------------------------------
-if [ "$DRY_RUN" = "1" ]; then
-  if [ "$TARGET_VERSION" = "$CURRENT_VERSION" ]; then
-    printf 'optcgsim already up to date: RSS version %s == cask version %s\n' "$TARGET_VERSION" "$CURRENT_VERSION"
-    printf '  (no download needed)\n'
-  else
-    printf 'Plan:\n'
-    printf '  old version:     %s\n' "$CURRENT_VERSION"
-    printf '  new version:     %s\n' "$TARGET_VERSION"
-    printf '  primary url:     %s\n' "$NEW_URL"
-    printf '  fallback url:    %s\n' "$DRIVE_URL"
-    printf '  download needed: yes (%s)\n' "$ZIP_HINT"
-    printf '  after download:  verify the binary version string and the <%s_Mac/OPTCGSim.app> zip entry,\n' "$TARGET_VERSION"
-    printf '                   then rewrite version/sha256/url in Casks/optcgsim.rb\n'
-  fi
-  exit 0
-fi
-
-if [ "$TARGET_VERSION" = "$CURRENT_VERSION" ]; then
-  printf 'optcgsim already up to date: RSS version %s == cask version %s (no download needed)\n' "$TARGET_VERSION" "$CURRENT_VERSION"
-  exit 0
-fi
-
 # --- download and checksum ------------------------------------------------------------
 ARCHIVE="$TMP_DIR/optcgsim.zip"
 download_zip() {
@@ -232,9 +204,6 @@ SHA256="$(shasum -a 256 "$ARCHIVE" | awk '{ print $1 }')"
 printf 'Verifying zip structure and binary version...\n' >&2
 ZIP_LISTING="$TMP_DIR/listing.txt"
 unzip -Z1 "$ARCHIVE" > "$ZIP_LISTING" || die "could not list the zip contents of $ARCHIVE"
-if ! grep -q "^${TARGET_VERSION//./\\.}_Mac/OPTCGSim.app/" "$ZIP_LISTING"; then
-  die "zip does not contain ${TARGET_VERSION}_Mac/OPTCGSim.app — the <version>_Mac folder naming inside the zip changed; refusing to rewrite the cask"
-fi
 DLL_PATH="$(grep -m1 'Assembly-CSharp\.dll$' "$ZIP_LISTING" || true)"
 [ -n "$DLL_PATH" ] || die "could not find Assembly-CSharp.dll inside $ARCHIVE"
 unzip -p "$ARCHIVE" "$DLL_PATH" > "$TMP_DIR/Assembly-CSharp.dll" || die "could not extract $DLL_PATH from $ARCHIVE"
@@ -251,8 +220,40 @@ sys.stdout.write(m.group(1).decode("ascii", "replace"))
 PY
 )" || die "could not find 'sim version:' in $DLL_PATH — this does not look like the optcgsim build"
 [ -n "$BIN_VERSION" ] || die "could not read the binary version from $DLL_PATH"
-if [ "$BIN_VERSION" != "$TARGET_VERSION" ]; then
-  die "downloaded binary reports version '$BIN_VERSION' but the RSS feed says '$TARGET_VERSION' — refusing to rewrite the cask"
+if ! grep -q "^${BIN_VERSION//./\\.}_Mac/OPTCGSim.app/" "$ZIP_LISTING"; then
+  die "zip does not contain ${BIN_VERSION}_Mac/OPTCGSim.app matching the binary version"
+fi
+case "$DLL_PATH" in
+  "${BIN_VERSION}_Mac/OPTCGSim.app/"*) ;;
+  *) die "versioned assembly is not inside ${BIN_VERSION}_Mac/OPTCGSim.app" ;;
+esac
+if [ -n "$VERSION_OVERRIDE" ] && [ "$BIN_VERSION" != "$VERSION_OVERRIDE" ]; then
+  die "downloaded binary reports $BIN_VERSION, not the requested $VERSION_OVERRIDE"
+fi
+if ! python3 - "$TARGET_VERSION" "$BIN_VERSION" "$CURRENT_VERSION" <<'PY'
+import re, sys
+def key(version):
+    m = re.fullmatch(r"(\d+)\.(\d+)([a-z]*)", version)
+    if not m:
+        raise ValueError(f"invalid version: {version}")
+    return int(m.group(1)), int(m.group(2)), m.group(3)
+feed, binary, current = sys.argv[1:]
+if key(binary) < key(feed):
+    sys.exit(f"Error: downloaded binary {binary} is older than expected version {feed}")
+if key(binary) < key(current):
+    sys.exit(f"Error: downloaded binary {binary} is older than installed cask {current}")
+PY
+then
+  die "refusing to use an older download"
+fi
+TARGET_VERSION="$BIN_VERSION"
+if [ "$TARGET_VERSION" = "$CURRENT_VERSION" ]; then
+  printf 'optcgsim already up to date: verified Mac build %s\n' "$CURRENT_VERSION"
+  exit 0
+fi
+if [ "$DRY_RUN" = "1" ]; then
+  printf 'Plan:\n  old version: %s\n  new version: %s\n  sha256: %s\n  url: %s\n' "$CURRENT_VERSION" "$TARGET_VERSION" "$SHA256" "$SOURCE_URL"
+  exit 0
 fi
 
 # --- rewrite the cask (version/sha256/url only) ------------------------------------
@@ -293,7 +294,7 @@ fi
 
 # --- summary ---------------------------------------------------------------------------------
 if [ "$STYLE_OK" = "1" ]; then STYLE_RESULT="pass"; else STYLE_RESULT="FAIL"; fi
-if [ "$AUDIT_OK" = "1" ]; then AUDIT_RESULT="pass"; else AUDIT_RESULT="FAIL"; fi
+if [ -n "$AUDIT_NOTE" ]; then AUDIT_RESULT="skipped"; elif [ "$AUDIT_OK" = "1" ]; then AUDIT_RESULT="pass"; else AUDIT_RESULT="FAIL"; fi
 
 printf '\nSummary:\n'
 printf '  optcgsim:    %s -> %s\n' "$CURRENT_VERSION" "$TARGET_VERSION"
