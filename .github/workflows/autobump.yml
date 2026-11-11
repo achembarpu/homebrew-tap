@@ -133,6 +133,7 @@ jobs:
       - name: Update optcgsim cask
         id: update
         run: |
+          python3 scripts/test-optcgsim-range.py
           python3 scripts/test-update-optcgsim.py
           set +e
           ./scripts/update-optcgsim.sh 2>&1 | tee /tmp/optcgsim-update.txt
@@ -152,11 +153,11 @@ jobs:
             exit 1
           fi
           echo "version=$new_version" >> "$GITHUB_OUTPUT"
-          echo "Updated optcgsim to $new_version"
           if git diff --quiet -- Casks/optcgsim.rb; then
-            echo "::warning::Casks/optcgsim.rb unchanged after script; skipping PR"
+            echo "No optcgsim update needed"
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
+            echo "Updated optcgsim to $new_version"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 

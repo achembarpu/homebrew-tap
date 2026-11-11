@@ -110,8 +110,9 @@ run `brew update && brew upgrade`.
 GitHub release, so `add-cask.sh` can't drive it. Run
 `./scripts/update-optcgsim.sh --dry-run` first, then the script without flags
 (see `.agents/skills/update-optcgsim/SKILL.md` for the full workflow).
-The check downloads the Mac archive even when the RSS feed has not changed,
-because the archive can contain a newer build than the feed announces.
+The check reads the Mac archive's ZIP directory and version-bearing binary
+using bounded HTTP byte ranges, since the archive can be newer than the RSS
+feed. A new build is downloaded in full to verify it and compute its SHA-256.
 
 ### Updating `junie-local`
 

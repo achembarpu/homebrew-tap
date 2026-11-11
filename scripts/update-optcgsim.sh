@@ -7,11 +7,11 @@ set -euo pipefail
 # the Mac Dropbox link on https://optcgsim.com/ and a Google Drive mirror. The
 # Dropbox filename segment is VESTIGIAL (it currently says 1_30d_Mac.zip while
 # the zip holds a newer build). The site's WordPress RSS feed may lag the Mac
-# download. Inspect the archive and its embedded
-# version, compare it with the feed, and compute its sha256 from a fresh download.
+# download. Inspect the ZIP and its embedded version with byte ranges. Download
+# the full archive and compute its sha256 only when a new build is available.
 #
 #   ./scripts/update-optcgsim.sh            # full bump: download, verify, rewrite
-#   ./scripts/update-optcgsim.sh --dry-run  # inspect the download without writing
+#   ./scripts/update-optcgsim.sh --dry-run  # inspect byte ranges without writing
 #   ./scripts/update-optcgsim.sh --version 1.43a  # override the feed version
 #
 # The script never commits; commit the cask separately.
@@ -40,12 +40,13 @@ Usage: update-optcgsim.sh [options]
 
 Bump Casks/optcgsim.rb to the version announced on optcgsim.com.
 
-The download URL is scraped from the site's Mac Dropbox link. The script
-downloads the zip, verifies its embedded version against the bundle path and
-the RSS feed, then rewrites the cask's version/sha256/url stanzas in place.
+The download URL is scraped from the site's Mac Dropbox link. The script reads
+bounded ZIP byte ranges to check the embedded version against the bundle path
+and RSS feed. A new build is downloaded in full, hashed and verified before
+rewriting the cask's version/sha256/url stanzas.
 
 Options:
-  --dry-run          Download and inspect the archive, without writing a cask.
+  --dry-run          Inspect archive byte ranges without writing a cask.
   --version <v>      Require this exact binary version instead of the RSS
                      minimum (the URL is still scraped and verified).
   -h, --help         Show this help.
@@ -140,6 +141,52 @@ IFS=$'\t' read -r TARGET_VERSION SCRAPED_URL DRIVE_URL <<<"$meta"
 NEW_FILENAME='1_#{version.tr(".", "_")}_Mac.zip'
 NEW_URL="$(printf '%s\n' "$SCRAPED_URL" | sed "s|[^/?]*Mac\.zip|${NEW_FILENAME}|")"
 [ "$NEW_URL" != "$SCRAPED_URL" ] || die "could not rebuild the Dropbox URL (no Mac.zip filename segment): $SCRAPED_URL"
+
+# Inspect the version-bearing ZIP entry without downloading the entire archive.
+printf 'Inspecting Mac archive using bounded byte ranges...\n' >&2
+SOURCE_URL="$NEW_URL"
+DOWNLOAD_URL="$SCRAPED_URL"
+if ! probe="$(python3 "$ROOT_DIR/scripts/probe-optcgsim.py" "$DOWNLOAD_URL")"; then
+  printf 'Dropbox range inspection failed; trying Google Drive mirror...\n' >&2
+  SOURCE_URL="$DRIVE_URL"
+  DOWNLOAD_URL="$DRIVE_URL"
+  if ! probe="$(python3 "$ROOT_DIR/scripts/probe-optcgsim.py" "$DOWNLOAD_URL")"; then
+    printf 'Neither Mac download supports a verified range inspection; no full download was attempted.\n' >&2
+    exit 75
+  fi
+fi
+IFS=$'\t' read -r PROBED_VERSION PROBED_BYTES <<<"$probe"
+[ -n "$PROBED_VERSION" ] || die "could not determine the archive version"
+printf 'Mac archive reports %s (%s bytes inspected).\n' "$PROBED_VERSION" "$PROBED_BYTES" >&2
+if [ -n "$VERSION_OVERRIDE" ] && [ "$PROBED_VERSION" != "$VERSION_OVERRIDE" ]; then
+  die "downloaded binary reports $PROBED_VERSION, not the requested $VERSION_OVERRIDE"
+fi
+if ! python3 - "$TARGET_VERSION" "$PROBED_VERSION" "$CURRENT_VERSION" <<'PY'
+import re, sys
+def key(version):
+    m = re.fullmatch(r"(\d+)\.(\d+)([a-z]*)", version)
+    if not m:
+        raise ValueError(f"invalid version: {version}")
+    return int(m.group(1)), int(m.group(2)), m.group(3)
+feed, binary, current = sys.argv[1:]
+if key(binary) < key(feed):
+    sys.exit(f"Error: downloaded binary {binary} is older than expected version {feed}")
+if key(binary) < key(current):
+    sys.exit(f"Error: downloaded binary {binary} is older than pinned cask {current}")
+PY
+then
+  die "refusing to use an older download"
+fi
+TARGET_VERSION="$PROBED_VERSION"
+if [ "$TARGET_VERSION" = "$CURRENT_VERSION" ]; then
+  printf 'optcgsim already up to date: verified Mac build %s\n' "$CURRENT_VERSION"
+  exit 0
+fi
+if [ "$DRY_RUN" = "1" ]; then
+  printf 'Plan:\n  old version: %s\n  new version: %s\n  url: %s\n  full download needed: yes (%s)\n' "$CURRENT_VERSION" "$TARGET_VERSION" "$SOURCE_URL" "$ZIP_HINT"
+  exit 0
+fi
+
 # --- download and checksum ------------------------------------------------------------
 ARCHIVE="$TMP_DIR/optcgsim.zip"
 download_zip() {
@@ -183,10 +230,13 @@ PY
   fi
 }
 
-printf 'Downloading %s (%s)...\n' "$SCRAPED_URL" "$ZIP_HINT" >&2
-SOURCE_URL="$NEW_URL"
-if ! download_zip "$SCRAPED_URL"; then
+printf 'Downloading %s (%s)...\n' "$DOWNLOAD_URL" "$ZIP_HINT" >&2
+if ! download_zip "$DOWNLOAD_URL"; then
   DROPBOX_REASON="$DOWNLOAD_REASON"
+  if [ "$DOWNLOAD_URL" = "$DRIVE_URL" ]; then
+    printf 'Google Drive unavailable: %s\n' "$DOWNLOAD_REASON" >&2
+    exit 75
+  fi
   printf 'Dropbox unavailable: %s\n' "$DROPBOX_REASON" >&2
   printf 'Trying Google Drive mirror...\n' >&2
   SOURCE_URL="$DRIVE_URL"
@@ -227,34 +277,7 @@ case "$DLL_PATH" in
   "${BIN_VERSION}_Mac/OPTCGSim.app/"*) ;;
   *) die "versioned assembly is not inside ${BIN_VERSION}_Mac/OPTCGSim.app" ;;
 esac
-if [ -n "$VERSION_OVERRIDE" ] && [ "$BIN_VERSION" != "$VERSION_OVERRIDE" ]; then
-  die "downloaded binary reports $BIN_VERSION, not the requested $VERSION_OVERRIDE"
-fi
-if ! python3 - "$TARGET_VERSION" "$BIN_VERSION" "$CURRENT_VERSION" <<'PY'
-import re, sys
-def key(version):
-    m = re.fullmatch(r"(\d+)\.(\d+)([a-z]*)", version)
-    if not m:
-        raise ValueError(f"invalid version: {version}")
-    return int(m.group(1)), int(m.group(2)), m.group(3)
-feed, binary, current = sys.argv[1:]
-if key(binary) < key(feed):
-    sys.exit(f"Error: downloaded binary {binary} is older than expected version {feed}")
-if key(binary) < key(current):
-    sys.exit(f"Error: downloaded binary {binary} is older than installed cask {current}")
-PY
-then
-  die "refusing to use an older download"
-fi
-TARGET_VERSION="$BIN_VERSION"
-if [ "$TARGET_VERSION" = "$CURRENT_VERSION" ]; then
-  printf 'optcgsim already up to date: verified Mac build %s\n' "$CURRENT_VERSION"
-  exit 0
-fi
-if [ "$DRY_RUN" = "1" ]; then
-  printf 'Plan:\n  old version: %s\n  new version: %s\n  sha256: %s\n  url: %s\n' "$CURRENT_VERSION" "$TARGET_VERSION" "$SHA256" "$SOURCE_URL"
-  exit 0
-fi
+[ "$BIN_VERSION" = "$PROBED_VERSION" ] || die "archive changed between range inspection ($PROBED_VERSION) and full download ($BIN_VERSION)"
 
 # --- rewrite the cask (version/sha256/url only) ------------------------------------
 # version/sha256 patterns are verbatim from add-cask.sh (those lines have no
