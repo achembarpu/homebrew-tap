@@ -27,7 +27,8 @@ end
 
 # These fixtures reproduce the storage locations that motivated the audit.
 storage = {
-  "agent-orchestrator"   => ["~/.ao/electron/settings.json"],
+  "agent-orchestrator"   => ["~/.ao/electron/settings.json",
+                             "~/Library/Caches/agent-orchestrator-updater/pending/update.zip"],
   "clearly"              => ["~/Library/Application Support/Clearly/diagnostic.log",
                              "~/Library/Application Support/Scratchpads/note.md"],
   "happier"              => ["~/.happier/servers/cloud/access.key",

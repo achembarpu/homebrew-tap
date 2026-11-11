@@ -80,6 +80,7 @@ cask "agent-orchestrator" do
       trash:  [
         "~/.ao",
         "~/Library/Application Support/Agent Orchestrator",
+        "~/Library/Caches/agent-orchestrator-updater",
         "~/Library/Caches/dev.agent-orchestrator.desktop",
         "~/Library/Caches/dev.agent-orchestrator.desktop.ShipIt",
         "~/Library/HTTPStorages/dev.agent-orchestrator.desktop",
