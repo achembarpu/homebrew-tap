@@ -7,9 +7,9 @@
 class JunieLocal < Formula
   desc "Setup command for Junie's optional local model"
   homepage "https://github.com/jetbrains-junie/junie"
-  url "https://raw.githubusercontent.com/jetbrains-junie/junie/d66ff663b984ee9b969e7b18bbef77968cc1dbb9/local/install.sh"
-  version "2026.10.23"
-  sha256 "9ce1cb55639c3b535e25b742357658f1b2f1137e350f5da88199d9ee949bbd3e"
+  url "https://raw.githubusercontent.com/jetbrains-junie/junie/f2a25c80de799d448c95f0a84e0a462946da073c/local/install.sh"
+  version "2026.10.27"
+  sha256 "4b8b2d84930aaea3df5d3f6098cd3265a8d62f966ae0b5cc912b21fd4f3405e9"
 
   livecheck do
     skip "The script is intentionally pinned to an upstream commit"
