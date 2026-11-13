@@ -1,6 +1,6 @@
 cask "zeron" do
-  version "0.2.138"
-  sha256 "f7e06f83af7aec3da1c4ffb826d55b4940f31c9980a104fedddff564093f4c0f"
+  version "0.3.4"
+  sha256 "7190b01f8fc4a9eab7efa456e4ed9f51b03fb3275524814715a9a41e43bca225"
 
   url "https://github.com/zeronsh/zeron/releases/download/v#{version}/zeron-#{version}-macos-arm64.dmg"
   name "Zeron"
@@ -14,7 +14,7 @@ cask "zeron" do
 
   auto_updates true
   depends_on arch: :arm64
-  depends_on macos: :monterey
+  depends_on macos: :ventura
 
   app "Zeron.app"
 
