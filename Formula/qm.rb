@@ -1,8 +1,8 @@
 class Qm < Formula
   desc "Deployment CLI for portable QM deployments"
   homepage "https://github.com/yc-software/qm/tree/main/cli#readme"
-  url "https://registry.npmjs.org/@yc-software/qm/-/qm-0.1.17.tgz"
-  sha256 "e387d48ec947f400febdfa20519671a51e709de0762aab94bc976cec23cb6d49"
+  url "https://registry.npmjs.org/@yc-software/qm/-/qm-0.1.18.tgz"
+  sha256 "c94c6edbb364f171558c8fc598c420072adcc5fc26941af94cc4617152f89836"
   license "MIT"
 
   livecheck do
