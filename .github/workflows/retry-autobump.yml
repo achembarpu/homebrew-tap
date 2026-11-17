@@ -1,0 +1,39 @@
+name: retry brew bump
+
+# GitHub occasionally cannot acquire a hosted macOS arm64 runner within its
+# queue window and cancels the job ("The job was not acquired by Runner ...
+# even after multiple attempts"). That is transient capacity, not a bump
+# failure. Re-run only those cancelled jobs, bounded so a genuine failure does
+# not loop forever.
+on:
+  workflow_run:
+    workflows: ["brew bump"]
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  retry:
+    name: Retry jobs cancelled while queued
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.run_attempt < 3
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Re-run cancelled jobs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          cancelled="$(gh api "repos/$GH_REPO/actions/runs/$RUN_ID/jobs" \
+            --jq '[.jobs[] | select(.conclusion == "cancelled")] | length')"
+          if [ "$cancelled" -eq 0 ]; then
+            echo "No cancelled jobs; leaving this failure for a human."
+            exit 0
+          fi
+          echo "Re-running $cancelled cancelled job(s) from run $RUN_ID"
+          gh run rerun "$RUN_ID" --failed

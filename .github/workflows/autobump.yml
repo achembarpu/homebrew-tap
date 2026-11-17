@@ -52,8 +52,9 @@ jobs:
       # generic path downloads a new artifact, recomputes sha256, rewrites the
       # versioned URL and checksum, runs `brew audit`/`brew style`, and opens
       # one PR per outdated package with --no-fork (branch pushed directly to
-      # this repo). An open PR for an older version is closed before creating
-      # its replacement; an equivalent PR is kept. `--full-name`
+      # this repo). Every bump path closes open PRs for older versions of the
+      # same package before opening its replacement; an equivalent PR is kept.
+      # `--full-name`
       # keeps `brew bump`/`brew bump-cask-pr` on this tap when a package also
       # exists in Homebrew/cask (for example, superset).
       # HOMEBREW_GITHUB_API_TOKEN must be a repository-scoped PAT. The default
@@ -170,6 +171,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
         run: |
+          open_prs="$(gh pr list --state open --search "optcgsim in:title" --json number,title |
+            jq -r --arg prefix "optcgsim " --arg current "optcgsim ${{ steps.update.outputs.version }}" \
+              '.[] | select(.title | startswith($prefix)) | select(.title != $current) | .number')"
+          for pr in $open_prs; do
+            gh pr close "$pr" --delete-branch --comment "Superseded by the automated optcgsim ${{ steps.update.outputs.version }} bump."
+          done
+
           BRANCH="bump-optcgsim-${{ steps.update.outputs.version }}"
           if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
             echo "Branch $BRANCH already exists on remote, skipping"
@@ -258,11 +266,28 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
         run: |
-          branch="bump-${{ matrix.formula }}-${{ steps.update.outputs.version }}"
-          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then exit 0; fi
+          formula="${{ matrix.formula }}"
+          version="${{ steps.update.outputs.version }}"
+          branch="bump-$formula-$version"
+
+          # GitHub has no native "newer PR supersedes older PR" rule. Close
+          # older open bumps for this formula so only the newest one stays.
+          open_prs="$(gh pr list --state open --search "$formula in:title" --json number,title |
+            jq -r --arg prefix "$formula " --arg current "$formula $version" \
+              '.[] | select(.title | startswith($prefix)) | select(.title != $current) | .number')"
+          for pr in $open_prs; do
+            gh pr close "$pr" --delete-branch --comment "Superseded by the automated $formula $version bump."
+          done
+
+          if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+            if ! gh pr list --state open --head "$branch" --json number | jq -e 'length > 0' >/dev/null; then
+              gh pr create --head "$branch" --title "$formula $version" --body "Automated architecture-aware bump via scripts/update-arch-formula.sh."
+            fi
+            exit 0
+          fi
            git checkout -b "$branch"
-           git add "Formula/${{ matrix.formula }}.rb"
-           git commit -m "${{ matrix.formula }} ${{ steps.update.outputs.version }}"
+           git add "Formula/$formula.rb"
+           git commit -m "$formula $version"
            for attempt in 1 2 3 4 5; do
              if git push origin "$branch"; then
                break
@@ -273,7 +298,7 @@ jobs:
              fi
              sleep $((attempt * 5))
            done
-          gh pr create --title "${{ matrix.formula }} ${{ steps.update.outputs.version }}" --body "Automated architecture-aware bump via scripts/update-arch-formula.sh."
+          gh pr create --title "$formula $version" --body "Automated architecture-aware bump via scripts/update-arch-formula.sh."
 
   bump-junie-local:
     name: Bump junie-local (pinned script)
@@ -358,6 +383,13 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_GITHUB_API_TOKEN }}
         run: |
+          open_prs="$(gh pr list --state open --search "junie-local in:title" --json number,title |
+            jq -r --arg prefix "junie-local " --arg current "junie-local ${{ steps.update.outputs.version }}" \
+              '.[] | select(.title | startswith($prefix)) | select(.title != $current) | .number')"
+          for pr in $open_prs; do
+            gh pr close "$pr" --delete-branch --comment "Superseded by the automated junie-local ${{ steps.update.outputs.version }} bump."
+          done
+
           BRANCH="bump-junie-local-${{ steps.update.outputs.version }}"
           if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null 2>&1; then
             echo "Branch $BRANCH already exists on remote, skipping"

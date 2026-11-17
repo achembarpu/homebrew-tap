@@ -95,8 +95,9 @@ casks. Run `./scripts/add-cask.sh --help` for its options.
   are excluded because Homebrew's generic bump parser cannot rewrite their
   architecture-specific URL stanzas; `bump-arch-formulae` uses the dedicated
   updater instead. Do not use `no_autobump!` in this personal tap because
-  Homebrew rejects that DSL outside official taps. One PR per outdated package,
-  de-duplicated against open PRs.
+  Homebrew rejects that DSL outside official taps. Each bump path closes open
+  PRs for older versions of the same package before opening its replacement, so
+  only one bump PR per package stays open.
 - `bump-optcgsim` — runs `scripts/update-optcgsim.sh` for the Dropbox-hosted
   cask that has no `livecheck`.
 - `bump-junie-local` — runs `scripts/update-junie-local.sh` for the
@@ -104,6 +105,11 @@ casks. Run `./scripts/add-cask.sh --help` for its options.
   authority is the latest commit touching `local/install.sh`.
 - `bump-arch-formulae` — runs `scripts/update-arch-formula.sh` for `qwen-code`
   and `maki`, which each have architecture-specific release assets.
+
+`.github/workflows/retry-autobump.yml` handles the transient failure where
+GitHub cannot acquire a hosted macOS arm64 runner and cancels queued jobs. It
+re-runs only jobs that ended `cancelled`, for at most three run attempts, and
+leaves genuine failures for a human.
 
 No separate lint CI exists. Autobump validates its own edits; for hand-made
 bumps run `brew style` + `brew audit` locally as in Verification before
