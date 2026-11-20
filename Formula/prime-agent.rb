@@ -1,8 +1,8 @@
 class PrimeAgent < Formula
   desc "Self-improving coding and research agent"
   homepage "https://github.com/PrimeIntellect-ai/prime-agent"
-  url "https://github.com/PrimeIntellect-ai/prime-agent/releases/download/v0.10.4/prime-agent-0.10.4.tgz"
-  sha256 "3578af6ea1226e889634f0e430c5cc9d5095d7e2a4926358ea37eaea9156bd4d"
+  url "https://github.com/PrimeIntellect-ai/prime-agent/releases/download/v0.10.5/prime-agent-0.10.5.tgz"
+  sha256 "4a05341d5128d106741061cdfb5bc2b1f8bb59c8bbeeeec909ad0c9978186c87"
   license "MIT"
 
   livecheck do
