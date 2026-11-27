@@ -1,6 +1,6 @@
 cask "tuicommander" do
-  version "2.1.1"
-  sha256 "6646904ca10fd314bc52cd12515c1d9057f94ec95d418f44b70b3f0e6e8ff9ce"
+  version "2.1.2"
+  sha256 "6dd68fd0375aac7909fb7fc3bc6fd234f768f97cd377686bf498e0fde2afc860"
 
   url "https://github.com/sstraus/tuicommander/releases/download/v#{version}/TUICommander_#{version}_aarch64.dmg"
   name "TUICommander"
